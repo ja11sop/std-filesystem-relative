@@ -1,0 +1,11 @@
+import cuppa
+
+
+cuppa.run(
+    default_options = {
+        'boost-version': "latest",
+    },
+    default_dependencies = [
+        'boost' 
+    ],
+)

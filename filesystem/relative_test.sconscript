@@ -1,0 +1,13 @@
+Import( 'env' )
+
+Test = 'relative_test'
+
+Sources = [
+    Test + '.cpp'
+]
+
+env.AppendUnique( STATICLIBS = [
+    env.BoostStaticLibs( [ 'filesystem' ] )
+] )
+
+env.BuildTest( Test, Sources )
