@@ -26,3 +26,11 @@
 *.exe
 *.out
 *.app
+
+# Scons
+.sconsign.dblite
+config.log
+
+# Build and Thirdparty folders
+.cuppa/
+.build/
