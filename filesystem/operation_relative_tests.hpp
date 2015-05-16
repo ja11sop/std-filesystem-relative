@@ -41,7 +41,7 @@ void test_relative( const path_t& Path, const path_t& Start )
     {
         auto RealPath   = Path;
         auto RealStart  = Start;
-        auto CommonPath = remove_common( RealPath, RealStart );
+        auto CommonPath = remove_common_prefix( RealPath, RealStart );
 
         CommonPath = exists( CommonPath ) ? canonical( CommonPath ) : normalize( CommonPath );
         RealPath   = exists( Path )       ? canonical( Path )       : CommonPath/normalize( RealPath );

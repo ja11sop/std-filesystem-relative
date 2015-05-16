@@ -15,9 +15,9 @@ namespace boost {
 namespace filesystem {
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
 
-
+inline
 path
-remove_common( path& p1, path& p2 )
+remove_common_prefix( path& p1, path& p2 )
 {
     auto p1_elem = p1.begin();
     auto p1_end  = p1.end();
@@ -60,6 +60,7 @@ remove_common( path& p1, path& p2 )
 }
 
 
+inline
 path
 normalize( const path& p )
 {
@@ -100,6 +101,7 @@ normalize( const path& p )
 }
 
 
+inline
 path
 relative_to( const path& p, const path& start = current_path() )
 {
@@ -144,6 +146,7 @@ relative_to( const path& p, const path& start = current_path() )
 }
 
 
+inline
 path
 relativise( const path& p, const path& start = current_path() )
 {
@@ -151,6 +154,7 @@ relativise( const path& p, const path& start = current_path() )
 }
 
 
+inline
 path
 relative( const path& p, const path& start, system::error_code& ec )
 {
@@ -168,7 +172,7 @@ relative( const path& p, const path& start, system::error_code& ec )
 
     auto rel_p = normalize( real_p );
     auto rel_start = normalize( real_start );
-    auto common_path = remove_common( rel_p, rel_start );
+    auto common_path = remove_common_prefix( rel_p, rel_start );
 
     bool path_exists = exists( common_path );
     if( ec )
@@ -230,6 +234,7 @@ relative( const path& p, const path& start, system::error_code& ec )
 }
 
 
+inline
 path
 relative( const path& p, system::error_code& ec )
 {
@@ -237,6 +242,7 @@ relative( const path& p, system::error_code& ec )
 }
 
 
+inline
 path
 relative( const path& p, const path& start = current_path() )
 {
