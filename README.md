@@ -1,17 +1,14 @@
 # std-filesystem-relative
 
-## Building
+## Requirements
 
-
-### Requirements
-
-The tests build using [Scons](http://www.scons.org/) with **[cuppa](https://github.com/ja11sop/cuppa)** therefore you need to [install Scons](http://www.scons.org/download.php). It also used cuppa which can be easily installed using pip:
+The tests build using [Scons](http://www.scons.org/) with **[cuppa](https://github.com/ja11sop/cuppa)** therefore you need to [install Scons](http://www.scons.org/download.php). **[Cuppa](https://github.com/ja11sop/cuppa)** can be easily installed using pip:
 
 ```
 pip install cuppa
 ``` 
 
-### Building
+## Building
 
 To build simple call:
 
@@ -33,7 +30,7 @@ If you have multiple toolchains installed, or wish to build specific variants yo
 scons --dbg --rel --cov --toolchains=gcc48,gcc49,clang35,clang36
 ```
 
-### Running the Tests
+## Running the Tests
 
 To run tests simply call scons with `--test`. For example:
 
@@ -47,6 +44,6 @@ or
 scons --dbg --rel --cov --toolchains=gcc48,gcc49,clang35,clang36 --test
 ```
 
-### Dependencies
+## Dependencies
 
-The tests make use of [Boost](https://www.boost.org) however **cuppa** takes care of retrieving and building [Boost](https://www.boost.org) as needed.
+The tests make use of [Boost](https://www.boost.org) however **[cuppa](https://github.com/ja11sop/cuppa)** takes care of retrieving and building [Boost](https://www.boost.org) as needed.
