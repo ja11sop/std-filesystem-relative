@@ -10,7 +10,7 @@ pip install cuppa
 
 ## Building
 
-To build simple call:
+To build simply call:
 
 ```sh
 scons
