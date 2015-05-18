@@ -56,6 +56,7 @@ void test_relative( const path_t& Path, const path_t& Start )
         BOOST_TEST_MESSAGE( "Normalized = " << Normalized );
 
         BOOST_CHECK( Relative.empty() != ( Normalized == RealPath ) );
+
     }
 }
 
@@ -190,6 +191,84 @@ void test_real_relative_paths()
     test_relative( c_level_2, a_level_4 );
     test_relative( c_level_3, a_level_3 );
     test_relative( c_level_4, a_level_2 );
+
+    remove_all( test_base );
+}
+
+
+void multiple_nested_symlinks()
+{
+//     a / b / c / testfile
+//     a / d / e --> ../../a/b
+//     m / n --> /a
+//     x / y / z --> /m/n/d
+//
+//     If we start in "y", we will see the following directory structure:
+//     y
+//     |-- z
+//     |-- e
+//     |-- c
+//     |-- testfile
+
+    auto Base = boost::filesystem::current_path();
+
+    auto test_base = Base / "test_level_0";
+
+    auto dir_a = test_base / "dir_a";
+    auto dir_b = dir_a / "dir_b";
+    auto dir_c = dir_b / "dir_c";
+
+    create_directories( dir_c );
+
+    auto testdir = dir_c / "testdir";
+
+    create_directories( testdir );
+
+    auto dir_d = dir_a / "dir_d";
+
+    create_directories( dir_d );
+
+    auto dir_e = dir_d/ "dir_e";
+
+    create_directory_symlink( "../../dir_a/dir_b", dir_e );
+
+    auto dir_m = test_base / "dir_m";
+
+    create_directories( dir_m );
+
+    auto dir_n = dir_m / "dir_n";
+
+    create_directory_symlink( dir_a, dir_n );
+
+    auto dir_x = test_base / "dir_x";
+    auto dir_y = dir_x / "dir_y";
+
+    create_directories( dir_y );
+
+    auto dir_z = dir_y / "dir_z";
+
+    create_directory_symlink( dir_m / "dir_n/dir_d", dir_z );
+
+    test_relative( dir_x, testdir );
+    test_relative( testdir, dir_x );
+
+    test_relative( dir_y, testdir );
+    test_relative( testdir, dir_y );
+
+    test_relative( dir_z, testdir );
+    test_relative( testdir, dir_z );
+
+    test_relative( dir_m, testdir );
+    test_relative( testdir, dir_m );
+
+    test_relative( dir_n, testdir );
+    test_relative( testdir, dir_n );
+
+    test_relative( dir_d, testdir );
+    test_relative( testdir, dir_d );
+
+    test_relative( dir_e, testdir );
+    test_relative( testdir, dir_e );
 
     remove_all( test_base );
 }
@@ -485,6 +564,8 @@ void test_empty_path_return()
 
     BOOST_CHECK( rel_path.empty() );
 }
+
+
 
 // G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G
 #endif//FILESYSTEM_PATH_RELATIVE_TESTS_HPP_INCLUDED

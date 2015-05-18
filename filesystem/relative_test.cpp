@@ -2,13 +2,18 @@
 // T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
 #define BOOST_TEST_MODULE filesystem_relative
 #include <boost/test/included/unit_test.hpp>
-#include "operation_relative_tests.hpp"
+#include "filesystem/operation_relative_tests.hpp"
 // T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
 
 
 BOOST_AUTO_TEST_CASE( test_case_real_relative_paths )
 {
     test_real_relative_paths();
+}
+
+BOOST_AUTO_TEST_CASE( test_case_multiple_nested_symlinks )
+{
+    multiple_nested_symlinks();
 }
 
 BOOST_AUTO_TEST_CASE( test_case_imaginary_relative_paths )

@@ -6,6 +6,7 @@ cuppa.run(
         'boost-version': "latest",
     },
     default_dependencies = [
-        'boost' 
+        'boost'
     ],
+    default_runner = 'boost'
 )
