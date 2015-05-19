@@ -16,7 +16,7 @@ To build simply call:
 scons
 ```
 
-in the same folder as the sconstruct file or add `-D` (for Decend) from any folder at or below the `sconstruct` file
+in the same folder as the sconstruct file or add `-D` (for Descend) from any folder at or below the `sconstruct` file
 
 ```sh
 scons -D
