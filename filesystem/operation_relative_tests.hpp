@@ -585,9 +585,9 @@ void test_same_paths_imaginary()
 
 void test_same_paths()
 {
-    auto base_0 = boost::filesystem::current_path() / "level_0";
+    auto test_base = boost::filesystem::current_path() / "level_0";
 
-    auto path_1 = base_0 / "level_1";
+    auto path_1 = test_base / "level_1";
 
     create_directories( path_1 );
 
@@ -601,6 +601,8 @@ void test_same_paths()
     BOOST_CHECK( equivalent( canonical( path_1/dot ), canonical( path_1 ) ) ) ;
 
     test_relative( path_1, path_1 );
+
+    remove_all( test_base );
 }
 
 
