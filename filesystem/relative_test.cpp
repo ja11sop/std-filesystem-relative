@@ -41,3 +41,13 @@ BOOST_AUTO_TEST_CASE( test_case_empty_path_return )
     test_empty_path_return();
 }
 
+BOOST_AUTO_TEST_CASE( test_case_same_paths_imaginary )
+{
+    test_same_paths_imaginary();
+}
+
+BOOST_AUTO_TEST_CASE( test_case_same_paths )
+{
+    test_same_paths();
+}
+

@@ -566,6 +566,44 @@ void test_empty_path_return()
 }
 
 
+void test_same_paths_imaginary()
+{
+    auto base_0 = path_t( "//root_x/imaginary_level_0" );
+
+    auto path_1 = base_0 / "level_1";
+    auto path_2 = base_0 / "level_1";
+
+    auto rel_path = relative( path_1, path_2 );
+
+    auto dot = path_t(".");
+
+    BOOST_CHECK( rel_path == dot );
+
+    test_relative( path_1, path_2 );
+}
+
+
+void test_same_paths()
+{
+    auto base_0 = boost::filesystem::current_path() / "level_0";
+
+    auto path_1 = base_0 / "level_1";
+
+    create_directories( path_1 );
+
+    auto rel_path = relative( path_1, path_1 );
+
+    auto dot = path_t(".");
+
+    BOOST_CHECK( rel_path == dot );
+
+    BOOST_CHECK( equivalent( path_1/dot, path_1 ) );
+    BOOST_CHECK( equivalent( canonical( path_1/dot ), canonical( path_1 ) ) ) ;
+
+    test_relative( path_1, path_1 );
+}
+
+
 
 // G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G
 #endif//FILESYSTEM_PATH_RELATIVE_TESTS_HPP_INCLUDED
