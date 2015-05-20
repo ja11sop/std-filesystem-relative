@@ -16,13 +16,13 @@ To build simply call:
 scons
 ```
 
-in the same folder as the sconstruct file or add `-D` (for Descend) from any folder at or below the `sconstruct` file
+in the same folder as the `sconstruct` file or add `-D` (for Descend) from any folder at or below the `sconstruct` file
 
 ```sh
 scons -D
 ```
 
-By default with will build debug and release versions using the default toolchain for your system.
+By default this will build debug (`--dbg`) and release (`--rel`) versions using the default toolchain for your system.
 
 If you have multiple toolchains installed, or wish to build specific variants you could type this as an example:
 
