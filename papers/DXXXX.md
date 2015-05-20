@@ -6,11 +6,11 @@
 | Revises:         | None                       |
 | Project:         | Programming Language C++   |
 | Project number:  | TS 18822                   |
-| Reply-to:        | ja11sop                    |
+| Reply-to:        | TODO                       |
 
 ## Abstract
 
-This paper proposes the addition of ...
+This paper proposes the addition of several convenience functions to the [File System TS - N3940](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3940.html) to make handling of relative paths easier.
 
 ## Table of Contents
 
@@ -18,20 +18,21 @@ This paper proposes the addition of ...
   * [2. Motivation and Scope](#2-motivation-and-scope)
   * [3. Proposal and Design Discussion](#3-proposal-and-design-discussion)
   * [4. Proposed Wording](#4-proposed-wording)
+  * [5. Reference Implementation](#5-reference-implementation)
   * [Acknowledgements](#acknowledgements)
 
 ## 1. Introduction
 
-The [Filesystem TS - N3940](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3940.html) introduces relative paths.
+The [File System TS - N3940](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3940.html) introduces relative paths.
 
-* They are defined in section **4.18 relative path [fs.def.relative-path]** 
-* A decomposition method `relative_path()` is described in section **8.4.9 path decomposition [path.decompose]** 
+* They are defined in section **4.18 relative path [fs.def.relative-path]**
+* A decomposition method `relative_path()` is described in section **8.4.9 path decomposition [path.decompose]**
 * Two query methods to determine if a path either `has_relative_path()` or `is_relative()` described in **8.4.10 path query [path.query]**
 
 However there is no way to create a relative path as a path relative to another. Methods are provided to create absolute and canonical paths.
 
 In section **15.1 Absolute [fs.op.absolute]**:
- 
+
 ```cpp
 path absolute(const path& p, const path& base=current_path());
 ```
@@ -44,7 +45,7 @@ path canonical(const path& p, error_code& ec);
 path canonical(const path& p, const path& base, error_code& ec);
 ```
 
-By providing operations to achieve absolute and canonical paths there is no impediment to providing a similar operation `relative()` that attempts to return a new path relative to some base path. 
+By providing operations to achieve absolute and canonical paths there is no impediment to providing a similar operation `relative()` that attempts to return a new path relative to some base path.
 
 ## 2. Motivation and Scope
 
@@ -76,7 +77,7 @@ Other languages typically provide a similar function. For example python provide
 > **`os.path.relpath(path[, start])`**
 >
 > Return a relative filepath to `path` either from the current directory or from an optional `start` directory. This is a path computation: the filesystem is not accessed to confirm the existence or nature of `path` or `start`.
-> 
+>
 > `start` defaults to `os.curdir`
 
 ## 3. Proposal and Design Discussion
@@ -84,6 +85,8 @@ Other languages typically provide a similar function. For example python provide
 Proposal here...
 
 ## 4. Proposed Wording
+
+**TODO**
 
 Modify section:
 
@@ -142,6 +145,12 @@ path relative(const path& p, const path& start, error_code& ec);
 
 and bump all following sections up by 0.2. Update the contents and any cross-references accordingly.
 
+## Reference Implementation
+
+A reference implementation along with tests can be found here:
+
+https://github.com/ja11sop/std-filesystem-relative
+
 ## Acknowledgements
 
-Todo
+**TODO**
