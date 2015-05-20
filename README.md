@@ -44,6 +44,10 @@ or
 scons --dbg --rel --cov --toolchains=gcc48,gcc49,clang35,clang36 --test
 ```
 
+## Generating HTML Papers
+
+Any paper revisions under the `papers` directory are converted to HTML automatically during the build. All build output can be found under the `.build` directory by default.
+
 ## Dependencies
 
 The tests make use of [Boost](https://www.boost.org) however **[cuppa](https://github.com/ja11sop/cuppa)** takes care of retrieving and building [Boost](https://www.boost.org) as needed.
