@@ -145,7 +145,7 @@ Jave provides `java.nio.file.Path.normalize()`:
 
 ### 2.3 `remove_common_prefix`
 
-Lastly the implementation `relative` generally requires a function that can remove a common prefix, or at least return the common prefix from a number of paths passed to it. In the case of `relative` that would be `path` and `start` but in the general case it could be a range of paths.
+Lastly the implementation `relative` generally requires a function that can remove a common prefix, or at least return the common prefix from a number of paths passed to it. In the case of `relative` that would be `path` and `start` but in the general case it could be a range of paths. Python provides a function that is similar but flawed in that it only compares character-by-character allowing invalid paths to be returned.
 
 #### 2.3.1 Python
 
@@ -154,10 +154,6 @@ Python provides a similar function call `commonprefix()`:
 > **`os.path.commonprefix(list)`**
 >
 > Return the longest path prefix (taken character-by-character) that is a prefix of all paths in `list`. If `list` is empty, return the empty string (`''`). Note that this may return invalid paths because it works a character at a time.
-
-##### 2.3.2 Java
-
-Java does not provide an equivalent.
 
 ## 3. Design Discussion
 
