@@ -16,7 +16,7 @@ This paper proposes the addition of several convenience functions to the [File S
 
   * [1. Introduction](#1-introduction)
   * [2. Motivation and Scope](#2-motivation-and-scope)
-  * [3. Proposal and Design Discussion](#3-proposal-and-design-discussion)
+  * [3. Design Discussion](#3-design-discussion)
   * [4. Proposed Wording](#4-proposed-wording)
   * [5. Reference Implementation](#5-reference-implementation)
   * [Acknowledgements](#acknowledgements)
@@ -29,7 +29,7 @@ The [File System TS - N3940](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/
 * A decomposition method `relative_path()` is described in section **8.4.9 path decomposition [path.decompose]**
 * Two query methods to determine if a path either `has_relative_path()` or `is_relative()` described in **8.4.10 path query [path.query]**
 
-However there is no way to create a relative path as a path relative to another. Methods are provided to create absolute and canonical paths.
+However there is no way to create a relative path as a path relative to another. Methods are however provided to create absolute and canonical paths.
 
 In section **15.1 Absolute [fs.op.absolute]**:
 
@@ -45,22 +45,20 @@ path canonical(const path& p, error_code& ec);
 path canonical(const path& p, const path& base, error_code& ec);
 ```
 
-By providing operations to achieve absolute and canonical paths there is no impediment to providing a similar operation `relative()` that attempts to return a new path relative to some base path.
-
 ## 2. Motivation and Scope
 
-By providing operations to achieve absolute and canonical paths there is no impediment to providing a similar operation `relative()` that attempts to return a new path relative to some base path.
+By providing operations to achieve absolute and canonical paths there is no impediment to providing a similar operation `relative()` (exposition only) that attempts to return a new path relative to some base path.
 
 For example:
 
 
 ```cpp
-path relative(const path& p, const path& to = current_path());
+path relative(const path& p, const path& start = current_path());
 path relative(const path& p, error_code& ec);
-path relative(const path& p, const path& to, error_code& ec);
+path relative(const path& p, const path& start, error_code& ec);
 ```
 
-This would return a `path`, if possible, that is relative to `to`. The implementation can make use of `absolute()` and `canonical()` to determine the relative path, if it exists.
+This could return a `path`, if possible, that is relative to `start`. The implementation can make use of `absolute()` and `canonical()` when determining the relative path, if the paths existed.
 
 The File System TS is based on the `​boost::filesystem` library and it too suffers from this anomaly. There are open tickets for this in ​Boost Trac:
 
@@ -72,17 +70,52 @@ and it is the subject of several posts on StackOverflow for example:
   * ​[http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path](http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path)
   * [http://stackoverflow.com/questions/5772992/get-relative-path-from-two-absolute-paths](http://stackoverflow.com/questions/5772992/get-relative-path-from-two-absolute-paths)
 
-Other languages typically provide a similar function. For example python provides:
+Other languages typically provide a similar function.
+
+For example python provides `os.path.relpath()`:
 
 > **`os.path.relpath(path[, start])`**
 >
 > Return a relative filepath to `path` either from the current directory or from an optional `start` directory. This is a path computation: the filesystem is not accessed to confirm the existence or nature of `path` or `start`.
 >
 > `start` defaults to `os.curdir`
+>
+> Note: If no such relative path exists then the function will return `'.'` - the dot path representing the current directory.
 
-## 3. Proposal and Design Discussion
+Similarly Java provides provides `java.nio.file.Path.relativize()`:
 
-Proposal here...
+> **`Path relativize(Path other)`**
+>
+> Constructs a relative path between this path and a given path.
+>
+> Relativization is the inverse of `resolution`. This method attempts to construct a `relative` path that when `resolved` against this path, yields a path that locates the same file as the given path. For example, on UNIX, if this path is `"/a/b"` and the given path is `"/a/b/c/d"` then the resulting relative path would be `"c/d"`. Where this path and the given path do not have a `root` component, then a relative path can be constructed. A `relative` path cannot be constructed if only one of the paths has a `root` component. Where both paths have a `root` component then it is implementation dependent if a relative path can be constructed. If this path and the given path are `equal` then an empty path is returned.
+>
+>  For any two `normalized` paths *p* and *q*, where *q* does not have a `root` component,
+>
+>   `p.relativize(p.resolve(q)).equals(q)`
+>
+> When symbolic links are supported, then whether the resulting path, when resolved against this path, yields a path that can be used to locate the *same* file as other is implementation dependent. For example, if this path is `"/a/b"` and the given path is `"/a/x"` then the resulting relative path may be `"../x"`. If `"b"` is a symbolic link then is implementation dependent if `"a/b/../x"` would locate the same file as `"/a/x"`.
+>
+> **Parameters:**
+>
+>    `other` - the path to relativize against this path
+>
+> **Returns:**
+>
+>    the resulting relative path, or an empty path if both paths are equal
+>
+> **Throws:**
+>
+>    `IllegalArgumentException` - if `other` is not a `Path` that can be relativized against this path
+
+
+## 3. Design Discussion
+
+This proposal will suggest the addition of several complimentary functions that are required to adequately support the handling, creating and manipulation of relative paths. However before before doing so it is necessary to review the design space and discuss the trade-offs and use-cases that should be considered.
+
+If we set aside error handling for now and consider only some basic problems we can review
+
+
 
 ## 4. Proposed Wording
 
@@ -98,9 +131,9 @@ by adding the operational functions after `canonical`:
 ```cpp
 path normalize(const path& p) noexcept;
 
-path relative(const path& p, const path& to = current_path());
+path relative(const path& p, const path& start = current_path());
 path relative(const path& p, error_code& ec);
-path relative(const path& p, const path& to, error_code& ec);
+path relative(const path& p, const path& start, error_code& ec);
 ```
 ----
 

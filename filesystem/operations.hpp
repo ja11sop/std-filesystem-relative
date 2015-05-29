@@ -1,7 +1,10 @@
 // G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G
-#ifndef XBOOST_FILESYSTEM_PATH_HPP_INCLUDED
-#define XBOOST_FILESYSTEM_PATH_HPP_INCLUDED
+#ifndef XSTD_FILESYSTEM_OPERATIONS_HPP_INCLUDED
+#define XSTD_FILESYSTEM_OPERATIONS_HPP_INCLUDED
 // G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G
+
+// xstd Includes
+#include <filesystem/path.hpp>
 
 // Boost Library Includes
 #include <boost/filesystem.hpp>
@@ -14,6 +17,7 @@
 namespace boost {
 namespace filesystem {
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
+
 
 inline
 path
@@ -103,7 +107,7 @@ normalize( const path& p )
 
 inline
 path
-relative_to( const path& p, const path& start = current_path() )
+relative_to( const path& p, const path& start )
 {
     static const path dot(".");
     static const path dotdot("..");
@@ -148,7 +152,7 @@ relative_to( const path& p, const path& start = current_path() )
 
 inline
 path
-relativise( const path& p, const path& start = current_path() )
+relativise( const path& p, const path& start )
 {
     return relative_to( normalize( absolute( p ) ), normalize( absolute( start ) ) );
 }
@@ -156,7 +160,7 @@ relativise( const path& p, const path& start = current_path() )
 
 inline
 path
-relative( const path& p, const path& start, system::error_code& ec )
+relative( const path& p, const path& start, boost::system::error_code& ec )
 {
     auto real_p = p;
     auto real_start = start;
@@ -197,7 +201,7 @@ relative( const path& p, const path& start, system::error_code& ec )
     {
         if( !is_directory( start ) )
         {
-            ec.assign( system::errc::not_a_directory, system::generic_category() );
+            ec.assign( boost::system::errc::not_a_directory, boost::system::generic_category() );
             return path();
         }
         real_start = canonical( real_start, ec );
@@ -236,7 +240,7 @@ relative( const path& p, const path& start, system::error_code& ec )
 
 inline
 path
-relative( const path& p, system::error_code& ec )
+relative( const path& p, boost::system::error_code& ec )
 {
     return relative( p, current_path(), ec );
 }
@@ -246,12 +250,12 @@ inline
 path
 relative( const path& p, const path& start = current_path() )
 {
-    system::error_code local_ec;
+    boost::system::error_code local_ec;
     auto result = relative( p, start, local_ec );
     if( local_ec )
     {
         BOOST_FILESYSTEM_THROW
-        (   filesystem_error
+        (   boost::filesystem::filesystem_error
             (   "boost::filesystem::relative",
                 p, start,
                 local_ec   )   );

@@ -51,3 +51,8 @@ BOOST_AUTO_TEST_CASE( test_case_same_paths )
     test_same_paths();
 }
 
+BOOST_AUTO_TEST_CASE( test_case_paper_paths )
+{
+    test_paper_paths();
+}
+

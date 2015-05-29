@@ -255,9 +255,90 @@
 					<SilentBuild command="" />
 				</MakeCommands>
 			</Target>
+			<Target title="gcc51-dbg">
+				<Option working_dir="../../std-filesystem-relative/.build/filesystem/clang35/dbg/final" />
+				<Option object_output="../../std-filesystem-relative/.build/filesystem/clang35/dbg/working" />
+				<Option type="1" />
+				<Compiler>
+				</Compiler>
+				<Environment>
+					<Variable name="SCRIPTS" value="./filesystem/sconscript" />
+					<Variable name="TOOLCHAINS" value="gcc51" />
+					<Variable name="VARIANT" value="dbg" />					<Variable name="TEST" value="" />
+				</Environment>
+				<MakeCommands>
+					<Build command="" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="" />
+				</MakeCommands>
+			</Target>
+			<Target title="gcc51-dbg--test">
+				<Option working_dir="../../std-filesystem-relative/.build/filesystem/clang35/dbg/final" />
+				<Option object_output="../../std-filesystem-relative/.build/filesystem/clang35/dbg/working" />
+				<Option type="1" />
+				<Compiler>
+				</Compiler>
+				<Environment>
+					<Variable name="SCRIPTS" value="./filesystem/sconscript" />
+					<Variable name="TOOLCHAINS" value="gcc51" />
+					<Variable name="VARIANT" value="dbg" />					<Variable name="TEST" value="--test" />
+				</Environment>
+				<MakeCommands>
+					<Build command="" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="" />
+				</MakeCommands>
+			</Target>
+			<Target title="gcc51-rel">
+				<Option working_dir="../../std-filesystem-relative/.build/filesystem/clang35/dbg/final" />
+				<Option object_output="../../std-filesystem-relative/.build/filesystem/clang35/dbg/working" />
+				<Option type="1" />
+				<Compiler>
+				</Compiler>
+				<Environment>
+					<Variable name="SCRIPTS" value="./filesystem/sconscript" />
+					<Variable name="TOOLCHAINS" value="gcc51" />
+					<Variable name="VARIANT" value="rel" />					<Variable name="TEST" value="" />
+				</Environment>
+				<MakeCommands>
+					<Build command="" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="" />
+				</MakeCommands>
+			</Target>
+			<Target title="gcc51-rel--test">
+				<Option working_dir="../../std-filesystem-relative/.build/filesystem/clang35/dbg/final" />
+				<Option object_output="../../std-filesystem-relative/.build/filesystem/clang35/dbg/working" />
+				<Option type="1" />
+				<Compiler>
+				</Compiler>
+				<Environment>
+					<Variable name="SCRIPTS" value="./filesystem/sconscript" />
+					<Variable name="TOOLCHAINS" value="gcc51" />
+					<Variable name="VARIANT" value="rel" />					<Variable name="TEST" value="--test" />
+				</Environment>
+				<MakeCommands>
+					<Build command="" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command="" />
+				</MakeCommands>
+			</Target>
 		</Build>
 		<Unit filename="../filesystem/operation_relative_tests.hpp" />
 		<Unit filename="../filesystem/operations.hpp" />
+		<Unit filename="../filesystem/path.hpp" />
 		<Unit filename="../filesystem/relative_test.cpp" />
 		<Unit filename="../filesystem/sconscript" />
 		<Unit filename="../sconstruct" />

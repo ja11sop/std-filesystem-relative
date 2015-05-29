@@ -5,8 +5,9 @@
 
 // I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I
 
-// Under Test Include
-#include "operations.hpp"
+// Filesystem Includes
+#include "filesystem/operations.hpp"
+#include "filesystem/path.hpp"
 
 // Boost Library Includes
 #include <boost/filesystem.hpp>
@@ -17,7 +18,7 @@
 // I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I
 
 
-using path_t = boost::filesystem::path;
+using path_t = xstd::filesystem::path;
 
 
 void test_relative( const path_t& Path, const path_t& Start )
@@ -63,7 +64,7 @@ void test_relative( const path_t& Path, const path_t& Start )
 
 void test_real_relative_paths()
 {
-    auto Base = boost::filesystem::current_path();
+    path_t Base = boost::filesystem::current_path();
 
     auto test_base = Base / "test_level_0";
 
@@ -210,7 +211,7 @@ void multiple_nested_symlinks()
 //     |-- c
 //     |-- testfile
 
-    auto Base = boost::filesystem::current_path();
+    path_t Base = boost::filesystem::current_path();
 
     auto test_base = Base / "test_level_0";
 
@@ -330,7 +331,7 @@ void test_imaginary_relative_paths()
 
 void test_real_and_imaginary_relative_paths()
 {
-    auto Base = boost::filesystem::current_path();
+    path_t Base = boost::filesystem::current_path();
 
     auto test_base = Base / "test_level_0";
 
@@ -424,7 +425,7 @@ void test_real_and_imaginary_relative_paths()
 
 void test_real_and_imaginary_relative_paths_with_parent_and_current_directories()
 {
-    auto Base = boost::filesystem::current_path();
+    path_t Base = boost::filesystem::current_path();
 
     auto test_base = Base / "test_level_0";
 
@@ -552,7 +553,7 @@ void test_non_relative_paths()
 
 void test_empty_path_return()
 {
-    auto base_0 = boost::filesystem::current_path() / "level_0";
+    path_t base_0 = boost::filesystem::current_path() / "level_0";
 
     auto base_1 = path_t( "//root_x/imaginary_level_0" );
     auto base_2 = path_t( "//root_y/imaginary_level_0" );
@@ -585,7 +586,7 @@ void test_same_paths_imaginary()
 
 void test_same_paths()
 {
-    auto test_base = boost::filesystem::current_path() / "level_0";
+    path_t test_base = boost::filesystem::current_path() / "level_0";
 
     auto path_1 = test_base / "level_1";
 
@@ -603,6 +604,23 @@ void test_same_paths()
     test_relative( path_1, path_1 );
 
     remove_all( test_base );
+}
+
+
+void test_paper_paths()
+{
+//        path         start    =    rel_path
+//       ------       -------       ----------
+//
+//  1.   /a/d         /a/b/c          ../../d
+//  2.   /a/b/c       /a/d            ../b/c
+//  3.   //c_drive/y  //c_drive/x     ..\y
+//  4.   //d_drive/y  //c_drive/x     //d_drive/y
+
+    test_relative( "/a/d",        "/a/b/c" );
+    test_relative( "/a/b/c",      "/a/d"   );
+    test_relative( "//C_drive/y", "//C_drive/x" );
+    test_relative( "//D_drive/y", "//C_drive/x" );
 }
 
 
