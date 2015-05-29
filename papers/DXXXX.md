@@ -17,8 +17,9 @@ This paper proposes the addition of several convenience functions to the [File S
   * [1. Introduction](#1-introduction)
   * [2. Motivation and Scope](#2-motivation-and-scope)
   * [3. Design Discussion](#3-design-discussion)
-  * [4. Proposed Wording](#4-proposed-wording)
-  * [5. Reference Implementation](#5-reference-implementation)
+  * [4. Proposal](#4-proposal)
+  * [5. Proposed Wording](#5-proposed-wording)
+  * [6. Reference Implementation](#6-reference-implementation)
   * [Acknowledgements](#acknowledgements)
 
 ## 1. Introduction
@@ -157,19 +158,89 @@ Python provides a similar function call `commonprefix()`:
 
 ## 3. Design Discussion
 
-Ideally it should be possible to write something like this:
+There is a clear demarcation in the File System TS between *operations* that may touch the file system (such as `exists()`), and the `path` class itself which is a purely lexical abstraction used to store a representation of a conceptual path that may or may not have a realisation in a physical file system.
+
+### 3.1 Free function *operations* or `path` members or both
+
+Given that there already exists a separation between non-member operations that touch the file system and `path` with its lexical-only modifiers an argument can be made for retaining this distinction with the new proposed operations. For example having `normalize()` (or `make_normal()`) and `relativize()` (or `make_relative()`) members that are lexical only.
+
+A `remove_common_prefix()` (or `common_prefix()`) function makes most sense as a free function as it could operate on 2 or more paths at the same time.
+
+In the case of a `relative()` free function the expectation would be that this could implicitly touch the file system, like `canonical()` and `absolute()` (for example to default `start` to `current_path()`).
+
+Such a separation would nicely separate the need to specify whether a call to `relative()` should touch the file system as the expected behaviour would be obtained in each case. The member function would be lexical only (as expected) and the free function would "do the right thing" should the paths in question exist on the file system (symlinks be resolved and so on).
+
+### 3.2 `relative`
+
+This section will focus on use cases for `relative()` (or indeed `relativize()`/`make_relative()`). 
+
+If we assume we have a path `path` and a start directory `start` that we want to determine a relative path from, then there appear to be two main reasons to call `relative`:
+
+  1. To obtain, if one exists, a **relative path** `rel_path` from `start` to `path` such that on exists we can say that `path` is equivalent to `start/rel_path`.
+
+  2. To obtain the the **nearest path** `nearest_path` from `start` to `path`. If a relative path from `start` to `path` exists then that will be the `nearest_path` otherwise `absolute(path)` will itself be the `nearest_path`.
+
+The solution to the second use-case can be implemented in terms of the first use-case. The implications of each use-case determine what should be returned in the event that no relative path exists.
+
+#### 3.2.1 Return value when asking for a relative path
+
+In this case there are four possible situations:
+
+  1. a relative path exists
+  2. the paths are the same
+  3. no relative path exists
+  4. error (perhaps from calling other operations internally)
+
+There are a number of options of what to return for each situation. These are enumerated in as follows:
+
+| Scenario                | Option 1        | Option 2        | Option 3        |
+|:------------------------|-----------------|-----------------|-----------------|
+| relative path exists    | *relative path* | *relative path* | *relative path* |
+| the paths are the same  | `path(".")`     | `path(".")`     | `path()`        |
+| no relative path exists | `path()`        | **error**       | **error**       |
+| error                   | **error**       | **error**       | **error**       |
+
+The basic assumption is that should a relative path `rel_path` **from** the **start** path `start` for path `path` exist then it should hold that:
+
+```cpp
+path == normalize(start/rel_path)
+```
+
+This holds for all options shown. This proposal favours **Option 1** because it additionally allows general use to not result in an error. This is important for 2 reasons. First it paves the way to code such as the following (in reality you need to test `empty()`):
 
 ```cpp
 if( auto RelPath = relative( Path, Start ) )
 {
-    
+    // use RelPath
+}
+else
+{
+    // use Path
 }
 ```
 
+and second it allows use-case 2 (**nearest path**) to be trivially implemented in terms of this use-case. For example:
 
-## 4. Proposed Wording
+```cpp
+path nearest_path( const path& Path, const path& Start )
+{
+    if( auto RelPath = relative( Path, Start ) )
+    {
+        return RelPath;
+    }
+    return Path;
+}
+```
 
-**TODO**
+In fact unless `operator bool` is added to `path` to indicate whether a `path` is `empty()` or not the previous example would need to be rewritten in terms of `empty()`.
+
+## 4. Proposal
+
+The proposal is to add the following operations to ... **TODO**
+
+## 5. Proposed Wording
+
+**TO BE COMPLETED**
 
 Modify section:
 
@@ -228,9 +299,9 @@ path relative(const path& p, const path& start, error_code& ec);
 
 and bump all following sections up by 0.2. Update the contents and any cross-references accordingly.
 
-## Reference Implementation
+## 6. Reference Implementation
 
-A reference implementation along with tests can be found here:
+A prototype implementation based on [Boost.Filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/) along with tests can be found here, complete with a comprehensive set of tests.
 
 https://github.com/ja11sop/std-filesystem-relative
 
