@@ -47,10 +47,9 @@ path canonical(const path& p, const path& base, error_code& ec);
 
 ## 2. Motivation and Scope
 
-By providing operations to achieve absolute and canonical paths there is no impediment to providing a similar operation `relative()` (exposition only) that attempts to return a new path relative to some base path.
+By providing operations to achieve *absolute* and *canonical* paths there is no impediment to providing a similar operation `relative()` (exposition only) that attempts to return a new path *that is relative* to some *start* path.
 
 For example:
-
 
 ```cpp
 path relative(const path& p, const path& start = current_path());
@@ -58,7 +57,7 @@ path relative(const path& p, error_code& ec);
 path relative(const path& p, const path& start, error_code& ec);
 ```
 
-This could return a `path`, if possible, that is relative to `start`. The implementation can make use of `absolute()` and `canonical()` when determining the relative path, if the paths existed.
+This could return a `path`, if possible, that is relative to `start`. The implementation can make use of `absolute()` and `canonical()` when determining the relative path, if the paths exist.
 
 The File System TS is based on the `​boost::filesystem` library and it too suffers from this anomaly. There are open tickets for this in ​Boost Trac:
 
@@ -70,7 +69,11 @@ and it is the subject of several posts on StackOverflow for example:
   * ​[http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path](http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path)
   * [http://stackoverflow.com/questions/5772992/get-relative-path-from-two-absolute-paths](http://stackoverflow.com/questions/5772992/get-relative-path-from-two-absolute-paths)
 
+### 2.1 `relative`
+
 Other languages typically provide a similar function.
+
+#### 2.1.1 Python `relpath()`
 
 For example python provides `os.path.relpath()`:
 
@@ -82,19 +85,21 @@ For example python provides `os.path.relpath()`:
 >
 > Note: If no such relative path exists then the function will return `'.'` - the dot path representing the current directory.
 
+#### 2.1.2 Java `relativize()`
+
 Similarly Java provides provides `java.nio.file.Path.relativize()`:
 
 > **`Path relativize(Path other)`**
 >
 > Constructs a relative path between this path and a given path.
 >
-> Relativization is the inverse of `resolution`. This method attempts to construct a `relative` path that when `resolved` against this path, yields a path that locates the same file as the given path. For example, on UNIX, if this path is `"/a/b"` and the given path is `"/a/b/c/d"` then the resulting relative path would be `"c/d"`. Where this path and the given path do not have a `root` component, then a relative path can be constructed. A `relative` path cannot be constructed if only one of the paths has a `root` component. Where both paths have a `root` component then it is implementation dependent if a relative path can be constructed. If this path and the given path are `equal` then an empty path is returned.
+> Relativization is the inverse of `resolution`. This method attempts to construct a `relative` path that when `resolved` against this path, yields a path that locates the same file as the given path. For example, on UNIX, if this path is "`/a/b`" and the given path is "`/a/b/c/d`" then the resulting relative path would be "`c/d`". Where this path and the given path do not have a `root` component, then a relative path can be constructed. A `relative` path cannot be constructed if only one of the paths has a `root` component. Where both paths have a `root` component then it is implementation dependent if a relative path can be constructed. If this path and the given path are `equal` then an empty path is returned.
 >
 >  For any two `normalized` paths *p* and *q*, where *q* does not have a `root` component,
 >
 >   `p.relativize(p.resolve(q)).equals(q)`
 >
-> When symbolic links are supported, then whether the resulting path, when resolved against this path, yields a path that can be used to locate the *same* file as other is implementation dependent. For example, if this path is `"/a/b"` and the given path is `"/a/x"` then the resulting relative path may be `"../x"`. If `"b"` is a symbolic link then is implementation dependent if `"a/b/../x"` would locate the same file as `"/a/x"`.
+> When symbolic links are supported, then whether the resulting path, when resolved against this path, yields a path that can be used to locate the *same* file as other is implementation dependent. For example, if this path is "`/a/b`" and the given path is "`/a/x`" then the resulting relative path may be "`../x`". If "`b`" is a symbolic link then is implementation dependent if "`a/b/../x`" would locate the same file as "`/a/x`".
 >
 > **Parameters:**
 >
@@ -108,13 +113,62 @@ Similarly Java provides provides `java.nio.file.Path.relativize()`:
 >
 >    `IllegalArgumentException` - if `other` is not a `Path` that can be relativized against this path
 
+### 2.2 `normalize`
+
+In addition to reason about relative paths in the context of asserting that an absolute path can be combined with a relative path to create a new absolute path we also need a `normalize` facilty.
+
+Python and Java both provide their equivalents of this function. Note this is **not** the same as a `canonical` function. A `normalize` function is purely focused on the collapsing of redundant current "`.`", parent "`..`" and path separators at the lexical level. To achieve a normalised in the presence of a path that exists on the filesystem then `canonical` should be used.
+
+#### 2.2.1 Python 
+
+Python provides `os.path.normpath()`:
+
+> **`os.path.normpath(path)`**
+>
+> Normalize a pathname by collapsing redundant separators and up-level references so that `A//B`,` A/B/`, `A/./B` and `A/foo/../B` all become `A/B`. This string manipulation may change the meaning of a path that contains symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().
+
+#### 2.2.2 Java 
+
+Jave provides `java.nio.file.Path.normalize()`: 
+
+> **`Path normalize()`**
+>
+> Returns a path that is this path with redundant name elements eliminated.
+>
+> The precise definition of this method is implementation dependent but in general it derives from this path, a path that does not contain redundant name elements. In many file systems, the "`.`" and "`..`" are special names used to indicate the current directory and parent directory. In such file systems all occurrences of "`.`" are considered redundant. If a "`..`" is preceded by a non-"`..`" name then both names are considered redundant (the process to identify such names is repeated until is it no longer applicable).
+> 
+> This method does not access the file system; the path may not locate a file that exists. Eliminating "`..`" and a preceding name from a path may result in the path that locates a different file than the original path. This can arise when the preceding name is a symbolic link.
+> 
+> **Returns:**
+>
+>    the resulting path or this path if it does not contain redundant name elements; an empty path is returned if this path does have a root component and all name elements are redundant
+
+### 2.3 `remove_common_prefix`
+
+Lastly the implementation `relative` generally requires a function that can remove a common prefix, or at least return the common prefix from a number of paths passed to it. In the case of `relative` that would be `path` and `start` but in the general case it could be a range of paths.
+
+#### 2.3.1 Python
+
+Python provides a similar function call `commonprefix()`:
+
+> **`os.path.commonprefix(list)`**
+>
+> Return the longest path prefix (taken character-by-character) that is a prefix of all paths in `list`. If `list` is empty, return the empty string (`''`). Note that this may return invalid paths because it works a character at a time.
+
+##### 2.3.2 Java
+
+Java does not provide an equivalent.
 
 ## 3. Design Discussion
 
-This proposal will suggest the addition of several complimentary functions that are required to adequately support the handling, creating and manipulation of relative paths. However before before doing so it is necessary to review the design space and discuss the trade-offs and use-cases that should be considered.
+Ideally it should be possible to write something like this:
 
-If we set aside error handling for now and consider only some basic problems we can review
-
+```cpp
+if( auto RelPath = relative( Path, Start ) )
+{
+    
+}
+```
 
 
 ## 4. Proposed Wording
