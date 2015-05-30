@@ -78,7 +78,9 @@ Other languages typically provide a similar function.
 
 For example python provides `os.path.relpath()`:
 
-> **`os.path.relpath(path[, start])`**
+> ```python
+os.path.relpath(path[, start])
+```
 >
 > Return a relative filepath to `path` either from the current directory or from an optional `start` directory. This is a path computation: the filesystem is not accessed to confirm the existence or nature of `path` or `start`.
 >
@@ -90,7 +92,9 @@ For example python provides `os.path.relpath()`:
 
 Similarly Java provides provides `java.nio.file.Path.relativize()`:
 
-> **`Path relativize(Path other)`**
+> ```java
+Path relativize(Path other)
+```
 >
 > Constructs a relative path between this path and a given path.
 >
@@ -98,7 +102,9 @@ Similarly Java provides provides `java.nio.file.Path.relativize()`:
 >
 >  For any two `normalized` paths *p* and *q*, where *q* does not have a `root` component,
 >
->   `p.relativize(p.resolve(q)).equals(q)`
+>  ```java
+p.relativize(p.resolve(q)).equals(q)
+```
 >
 > When symbolic links are supported, then whether the resulting path, when resolved against this path, yields a path that can be used to locate the *same* file as other is implementation dependent. For example, if this path is "`/a/b`" and the given path is "`/a/x`" then the resulting relative path may be "`../x`". If "`b`" is a symbolic link then is implementation dependent if "`a/b/../x`" would locate the same file as "`/a/x`".
 >
@@ -114,25 +120,39 @@ Similarly Java provides provides `java.nio.file.Path.relativize()`:
 >
 >    `IllegalArgumentException` - if `other` is not a `Path` that can be relativized against this path
 
+#### 2.1.3 Go `Rel()`
+
+As part of the `filepath` package Go provides the `Rel()` function:
+
+> ```go
+func Rel(basepath, targpath string) (string, error)
+```
+>
+> `Rel` returns a relative path that is lexically equivalent to `targpath` when joined to `basepath` with an intervening separator. That is, `Join(basepath, Rel(basepath, targpath))` is equivalent to `targpath` itself. On success, the returned path will always be relative to `basepath`, even if `basepath` and `targpath` share no elements. An error is returned if `targpath` can't be made relative to `basepath` or if knowing the current working directory would be necessary to compute it. 
+
 ### 2.2 `normalize`
 
 In addition to reason about relative paths in the context of asserting that an absolute path can be combined with a relative path to create a new absolute path we also need a `normalize` facilty.
 
 Python and Java both provide their equivalents of this function. Note this is **not** the same as a `canonical` function. A `normalize` function is purely focused on the collapsing of redundant current "`.`", parent "`..`" and path separators at the lexical level. To achieve a normalised in the presence of a path that exists on the filesystem then `canonical` should be used.
 
-#### 2.2.1 Python 
+#### 2.2.1 Python `normpath()`
 
 Python provides `os.path.normpath()`:
 
-> **`os.path.normpath(path)`**
+> ```python
+os.path.normpath(path)
+```
 >
 > Normalize a pathname by collapsing redundant separators and up-level references so that `A//B`,` A/B/`, `A/./B` and `A/foo/../B` all become `A/B`. This string manipulation may change the meaning of a path that contains symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().
 
-#### 2.2.2 Java 
+#### 2.2.2 Java `normalize()`
 
 Jave provides `java.nio.file.Path.normalize()`: 
 
-> **`Path normalize()`**
+> ```java
+Path normalize()
+```
 >
 > Returns a path that is this path with redundant name elements eliminated.
 >
@@ -143,6 +163,25 @@ Jave provides `java.nio.file.Path.normalize()`:
 > **Returns:**
 >
 >    the resulting path or this path if it does not contain redundant name elements; an empty path is returned if this path does have a root component and all name elements are redundant
+
+#### 2.2.3 Go `Clean()`
+
+Go provides the `Clean()` function in the `filepath` package:
+
+> ```go
+func Clean(path string) string
+```
+>
+> `Clean` returns the shortest path name equivalent to `path` by purely lexical processing. It applies the following rules iteratively until no further processing can be done:
+>
+> 1. Replace multiple Separator elements with a single one.
+> 2. Eliminate each `.` path name element (the current directory).
+> 3. Eliminate each inner `..` path name element (the parent directory) along with the non-`..` element that precedes it.
+> 4. Eliminate `..` elements that begin a rooted path: that is, replace "`/..`" by "`/`" at the beginning of a path, assuming Separator is '`/`'.
+>
+> The returned path ends in a slash only if it represents a root directory, such as "`/`" on Unix or ``C:\`` on Windows.
+>
+> If the result of this process is an empty string, `Clean` returns the string "`.`". 
 
 ### 2.3 `remove_common_prefix`
 
