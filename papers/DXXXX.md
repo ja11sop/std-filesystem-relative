@@ -225,10 +225,10 @@ The solution to the second use-case can be implemented in terms of the first use
 
 Given a path `Path` and a start path `Start` then there are four possible situations:
 
-  1. a relative path exists
-  2. the paths are the same
-  3. no relative path exists
-  4. error (from calling other operations internally)
+  1.  a relative path exists
+  2.  the paths are the same
+  3.  no relative path exists
+  4.  error (from calling other operations internally)
 
 There are a number of options of what to return for each situation. These are enumerated in as follows:
 
@@ -239,10 +239,10 @@ There are a number of options of what to return for each situation. These are en
 | no relative path exists | `path()`        | **error**       | **error**       |
 | error                   | **error**       | **error**       | **error**       |
 
-The basic assumption is that should a relative path `rel_path` **from** the **start** path `start` for path `path` exist then it should hold that:
+The basic assumption is that should a relative path `RelPath` **from** the **start** path `Start` for path `Path` exist then it should hold that:
 
 ```cpp
-path == normalize(start/rel_path)
+Path == normalize(Start/RelPath)
 ```
 
 This holds for all options shown. **Option 1** is attractive because it additionally allows general use to not result in an error, minimising the extra code required while retaining intuitive use. This is important as it paves the way to code such as the following (in reality you need to test `empty()`):
@@ -278,46 +278,65 @@ path proximate( const path& Path, const path& Start )
 }
 ```
 
-A similar implementation of `proximate()` using **Option 2** or **Option 3** might look as follows:
+In order to support **Option 2** and **Option 3** it would be necessary to additionally specify a new error condition:
+
+```cpp
+enum class filesystem_errc {
+    no_relative_path_exists = implementation defined
+};
+```
+
+A similar implementation of `proximate()` using **Option 2** or **Option 3** therefore might look as follows:
 
 ```cpp
 path proximate( const path& Path, const path& Start )
 {
     error_code Error;
     auto RelPath = relative( Path, Start, Error );
-    if( Error && Error != no_relative_path )
+    // Only if relative() can return other errors otherwise we can just use:
+    // error_code DontCare;
+    if( Error && Error != filesystem_errc::no_relative_path_exists )
     {
-        // Only if relative() can return other 
-        // errors otherwise we can just use:
-        // error_code DontCare;
+        // Actual Error has occured
     }
     return RelPath.empty() ? Path : RelPath;
 }
 ```
+
 #### 3.2.2 Return value when asking for a proximate path
 
 Given a path `Path` and a path `Start` which we want to determine the proximate path from, we can see there are three possible situations:
 
-  1. `relative( Path, Start )` exists
-  2. `relative( Path, Start )` does not exist
-  3. error (from calling other operations internally)
+  1.  `relative( Path, Start )` exists
+  2.  `relative( Path, Start )` does not exist
+  3.  error (from calling other operations internally)
 
-There are two options of what to return for each situation. These are enumerated in as follows:
+It is simplest to specify `proximate()` in terms of `relative()` so that handling of paths (same of different) for which a relative path exists can be handled consistently. Where no relative path exists then `Path` is returned:
 
-| Scenario                | Option 1                  | Option 2                  |
-|:------------------------|---------------------------|---------------------------|
-| relative exists         | `relative( Path, Start )` | `relative( Path, Start )` |
-| no relative path        | `Path`                    | `Path`                    |
-| error                   | **error**                 | **error**                 |
+| Scenario                | Option 1                  |
+|:------------------------|---------------------------|
+| relative exists         | `relative( Path, Start )` |
+| no relative path        | `Path`                    |
+| error                   | **error**                 |
 
-
+An error will only arise from some internal call such as to the filesystem.
 
 #### 3.2.3 Two separate functions
 
+Given that there are two clear and distinct use-cases and that there is a reasonable vocabulary to distinguish them this proposal favours having both `relative()` and `proximate()`, standardising the vocabulary and making code more readable by making the intent clear.
 
-#### 3.2.4 Lexical only
+#### 3.2.4 Lexical only versions
+
+There is often a desire to restrict the behaviour of `relative()` and `proximate()` to a purely lexical operation. This is an important use case and should be supported. There are three ways in which this can be achieved:
+
+  1.  Provide lexical-only member functions to `path`, say, `make_relative()` and `make_proximate()`
+  2.  Provide alternatively named free-functions that are lexical-only (**bikeshed warning**). Possible names (considering `relative` only for simplicity) might be `make_relative()`, `relative_path()`, `lexical_relative()` and so on.
+  3.  The last option is to specify a tag of some description that is passed to `relative()` and `proximate()` that controls whether the operation is lexcial-only. At this time it appears that the motivating use-case for this is simply lexical, or not. Other specific use cases (such as normalising paths first but not resolving symlinks) are best left to the user to build on top of a lexical-only function.
 
 
+#### 3.2.5 Controlling base path for relative paths
+
+Rather than adding a separate `base` parameter to handle relative paths that are passed to `relative()` or `proximate()`, complicating the interface (`current_path()` would be the default) it is expected that users would first wrap the paths passed with `absolute()` and specify the required `base` path at that point.
 
 ## 4. Proposal
 
@@ -369,10 +388,10 @@ path normalize(const path& p) noexcept;
 ```
 
  * *Overview:*
-    Return a normalized path of `p` by collapsing all redundant current "`.`" and parent "`..`" directory elements.
+    Return a normalized path of `p` by collapsing all redundant current "`.`", parent "`..`" directory elements and directory-separator elements.
 
  * *Returns:*
-    A normalized path which may be relative or absolute but it will not contain any current "`.`" directory element or any parent "`..`" directory elements after the first non-parent element.
+    A normalized path which may be relative or absolute, though it will not contain any current "`.`" directory element or any parent "`..`" directory elements after the first non-parent element.
 
 **15.4 Relative [fs.op.relative]**
 
