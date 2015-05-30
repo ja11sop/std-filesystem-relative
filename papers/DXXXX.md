@@ -187,7 +187,7 @@ func Clean(path string) string
 
 Lastly the implementation `relative` generally requires a function that can remove a common prefix, or at least return the common prefix from a number of paths passed to it. In the case of `relative` that would be `path` and `start` but in the general case it could be a range of paths. Python provides a function that is similar but flawed in that it only compares character-by-character allowing invalid paths to be returned.
 
-#### 2.3.1 Python
+#### 2.3.1 Python `commonprefix()`
 
 Python provides a similar function call `commonprefix()`:
 
@@ -223,12 +223,12 @@ The solution to the second use-case can be implemented in terms of the first use
 
 #### 3.2.1 Return value when asking for a relative path
 
-In this case there are four possible situations:
+Given a path `Path` and a start path `Start` then there are four possible situations:
 
   1. a relative path exists
   2. the paths are the same
   3. no relative path exists
-  4. error (perhaps from calling other operations internally)
+  4. error (from calling other operations internally)
 
 There are a number of options of what to return for each situation. These are enumerated in as follows:
 
@@ -245,7 +245,7 @@ The basic assumption is that should a relative path `rel_path` **from** the **st
 path == normalize(start/rel_path)
 ```
 
-This holds for all options shown. This proposal favours **Option 1** because it additionally allows general use to not result in an error minimising the extra code required wile retaining intuitive use. This is important as it paves the way to code such as the following (in reality you need to test `empty()`):
+This holds for all options shown. **Option 1** is attractive because it additionally allows general use to not result in an error, minimising the extra code required while retaining intuitive use. This is important as it paves the way to code such as the following (in reality you need to test `empty()`):
 
 ```cpp
 if( auto RelPath = relative( Path, Start ) )
@@ -300,7 +300,7 @@ Given a path `Path` and a path `Start` which we want to determine the proximate 
 
   1. `relative( Path, Start )` exists
   2. `relative( Path, Start )` does not exist
-  3. error (perhaps from calling other operations internally)
+  3. error (from calling other operations internally)
 
 There are two options of what to return for each situation. These are enumerated in as follows:
 
@@ -327,6 +327,18 @@ The proposal is to add the following operations to ... **TODO**
 
 **TO BE COMPLETED**
 
+Insert the section:
+
+----
+
+**4.18 proximate path [fs.def.proximate-path]**
+
+A path that may be absolute or relative but which captures the shortest traversal from one path to another. If the start path shares the same root then proximate path will be relative, otherwise absolute beginning with the root of the path you want to traverse to.
+
+----
+
+and bump the following sub-section numbers up by 0.1.
+
 Modify section:
 
 **6 Header <filesystem> synopsis [fs.filesystem.synopsis]**
@@ -336,6 +348,10 @@ by adding the operational functions after `canonical`:
 ----
 ```cpp
 path normalize(const path& p) noexcept;
+
+path proximate(const path& p, const path& start = current_path());
+path proximate(const path& p, error_code& ec);
+path proximate(const path& p, const path& start, error_code& ec);
 
 path relative(const path& p, const path& start = current_path());
 path relative(const path& p, error_code& ec);
