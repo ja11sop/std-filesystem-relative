@@ -255,6 +255,29 @@ path proximate( const path& Path, const path& Start )
     return RelPath.empty() ? Path : RelPath;
 }
 ```
+#### 3.2.2 Return value when asking for a proximate path
+
+Given a path `Path` and a path `Start` which we want to determine the proximate path from, we can see there are three possible situations:
+
+  1. `relative( Path, Start )` exists
+  2. `relative( Path, Start )` does not exist
+  3. error (perhaps from calling other operations internally)
+
+There are two options of what to return for each situation. These are enumerated in as follows:
+
+| Scenario                | Option 1                  | Option 2                  |
+|:------------------------|---------------------------|---------------------------|
+| relative exists         | `relative( Path, Start )` | `relative( Path, Start )` |
+| no relative path        | `Path`                    | `Path`                    |
+| error                   | **error**                 | **error**                 |
+
+
+
+#### 3.2.3 Two separate functions
+
+
+#### 3.2.4 Lexical only
+
 
 
 ## 4. Proposal
