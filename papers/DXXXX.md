@@ -195,7 +195,9 @@ Lastly the implementation `relative` generally requires a function that can remo
 
 Python provides a similar function call `commonprefix()`:
 
-> **`os.path.commonprefix(list)`**
+> ```python
+os.path.commonprefix(list)
+```
 >
 > Return the longest path prefix (taken character-by-character) that is a prefix of all paths in `list`. If `list` is empty, return the empty string (`''`). Note that this may return invalid paths because it works a character at a time.
 
