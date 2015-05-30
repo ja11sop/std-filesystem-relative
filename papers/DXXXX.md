@@ -10,7 +10,7 @@
 
 ## Abstract
 
-This paper proposes the addition of several convenience functions to the [File System TS - N3940](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3940.html) to make handling of relative paths easier.
+This paper proposes the addition of several convenience functions to the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html) to make handling of relative paths easier.
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@ This paper proposes the addition of several convenience functions to the [File S
 
 ## 1. Introduction
 
-The [File System TS - N3940](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3940.html) introduces relative paths.
+The [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html) introduces relative paths.
 
 * They are defined in section **4.18 relative path [fs.def.relative-path]**
 * A decomposition method `relative_path()` is described in section **8.4.9 path decomposition [path.decompose]**
@@ -158,7 +158,7 @@ Python provides a similar function call `commonprefix()`:
 
 ## 3. Design Discussion
 
-There is a clear demarcation in the File System TS between *operations* that may touch the file system (such as `exists()`), and the `path` class itself which is a purely lexical abstraction used to store a representation of a conceptual path that may or may not have a realisation in a physical file system.
+There is a clear demarcation in the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html) between *operations* that may touch the file system (such as `exists()`), and the `path` class itself which is a purely lexical abstraction used to store a representation of a conceptual path that may or may not have a realisation in a physical file system.
 
 ### 3.1 Free function *operations* or `path` members or both
 
