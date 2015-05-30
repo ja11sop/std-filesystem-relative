@@ -16,6 +16,9 @@ This paper proposes the addition of several convenience functions to the [File S
 
   * [1. Introduction](#1-introduction)
   * [2. Motivation and Scope](#2-motivation-and-scope)
+      * [2.1 `relative`](#21-relative)
+      * [2.2 `normalize`](#22-normalize)
+      * [2.3 `remove_common_prefix`](#23-remove_common_prefix)
   * [3. Design Discussion](#3-design-discussion)
       * [3.1 Free function *operations* or `path` members or both](#31-free-function-operations-or-path-members-or-both)
       * [3.2 `relative`](#32-relative)
@@ -186,6 +189,38 @@ func Clean(path string) string
 > The returned path ends in a slash only if it represents a root directory, such as "`/`" on Unix or ``C:\`` on Windows.
 >
 > If the result of this process is an empty string, `Clean` returns the string "`.`". 
+
+#### 2.2.4 C++ Boost.Filesystem `normalize()`
+
+Earlier versions of [Boost.Filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/) included a `normalize()` member function of `path` but it was removed in version [1.34](http://www.boost.org/doc/libs/1_34_0/libs/filesystem/doc/tr2_proposal.html) as part of the revamp of the library for a TR2 proposal. It's specification is shown below:
+
+> ```cpp
+path & normalize();
+```
+> **Postcondition**: `m_name` is in *normalized form*.
+>
+> **Returns**: `*this`
+>
+> *Normalized form*
+>
+> Normalized form is the same as *canonical form*, except that adjacent *name*, *parent-directory* elements are recursively removed.
+> Thus a non-empty path in normal form either has no *directory-placeholders*, or consists solely of one *directory-placeholder*. If it has *parent-directory* elements, they precede all *name* elements.
+>
+> *Canonical form*
+>
+> All operations modifying *path* objects leave the *path* object in canonical form. An empty path is in canonical form. A non-empty path is converted to canonical form as if by first converting it to the conceptual model, and then:
+>  *  Repeatedly replacing any leading *root-directory*, *parent-directory* elements with a single *root-directory* element. Rationale: Both POSIX and Windows specify this reduction; specifying it for *canonical form* ensures portable semantics for other operating systems.
+>  *  Removing each *directory-placeholder* element.
+>  *  If the path is now empty, add a single *directory-placeholder* element.
+
+The rationale for the removal of `normalize()` (and `canonize()` which was also a `path` member) was:
+
+> The Boost implementation has `basic_path` functions `canonize()` and `normalize()` which return cleaned up string representations of a pathname. They have been removed from the proposal as messy to specify and implement, not hugely useful, and possible to implement by users as non-member functions without any loss of functionality or efficiency. There was also a concern the proposal was getting a bit large.
+>
+> These functions can be added later as convenience functions if the LWG so desires..
+> &mdash;Beman Dawes
+
+However both functions are hugely useful and also specifiable. In fact `canonical()` is part of the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html). `normalize()` is most useful when considered in the context of a relative path which does not represent a real path on the filesystem. Consider the question of creating path from a base path and a relative path - lexically. `normalize()` is required in order to create an easily interpreted representation.
 
 ### 2.3 `remove_common_prefix`
 
