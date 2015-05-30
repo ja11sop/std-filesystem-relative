@@ -394,7 +394,7 @@ This proposal believes that a single free-function `normalize()` is sufficient t
 
 A common operation, and one that is often used in the implementation of `relative()` is a `remove_common_prefix()` or a `common_prefix()` function. This takes 2 or more `path` objects (depending on its specification) and returns a `path` object that represents the common prefix shared by all paths&mdash;if it exists.
 
-**TO BE COMPLETED****
+**TO BE COMPLETED**
 
 ## 4. Proposal
 
