@@ -17,6 +17,10 @@ This paper proposes the addition of several convenience functions to the [File S
   * [1. Introduction](#1-introduction)
   * [2. Motivation and Scope](#2-motivation-and-scope)
   * [3. Design Discussion](#3-design-discussion)
+      * [3.1 Free function *operations* or `path` members or both]()
+      * [3.2 `relative`]()
+      * [3.3 `normalize`]()
+      * [3.4 `remove_common_prefix` or `common_prefix`]()
   * [4. Proposal](#4-proposal)
   * [5. Proposed Wording](#5-proposed-wording)
   * [6. Reference Implementation](#6-reference-implementation)
@@ -329,18 +333,50 @@ Given that there are two clear and distinct use-cases and that there is a reason
 
 There is often a desire to restrict the behaviour of `relative()` and `proximate()` to a purely lexical operation. This is an important use case and should be supported. There are three ways in which this can be achieved:
 
-  1.  Provide lexical-only member functions to `path`, say, `make_relative()` and `make_proximate()`
+  1.  Provide lexical-only member functions to `path`, say, `make_relative()` and `make_proximate()`, or `relative_from()` and `proximate_from()`. If such member functions were provided it may make sense to include a `make_normal()` or `normalize()` member also. 
   2.  Provide alternatively named free-functions that are lexical-only (**bikeshed warning**). Possible names (considering `relative` only for simplicity) might be `make_relative()`, `relative_path()`, `lexical_relative()` and so on.
-  3.  The last option is to specify a tag of some description that is passed to `relative()` and `proximate()` that controls whether the operation is lexcial-only. At this time it appears that the motivating use-case for this is simply lexical, or not. Other specific use cases (such as normalising paths first but not resolving symlinks) are best left to the user to build on top of a lexical-only function.
-
+  3.  The last option is to specify a tag of some description that is passed to `relative()` and `proximate()` that controls whether the operation is lexcial-only. At this time it appears that the motivating use-case for this is simply lexical, or not. Other specific use cases (such as normalising paths first but not resolving symlinks) are best left to the user to build on top of a lexical-only function. If that is the case this could essentially be a `bool` flag.
 
 #### 3.2.5 Controlling base path for relative paths
 
 Rather than adding a separate `base` parameter to handle relative paths that are passed to `relative()` or `proximate()`, complicating the interface (`current_path()` would be the default) it is expected that users would first wrap the paths passed with `absolute()` and specify the required `base` path at that point.
 
+#### 3.2.6 Just Working
+
+**TODO** (in the presence of paths or not)
+
+### 3.3 `normalize`
+
+The specification of a `normalize()` free function, member or both is relatively straightforward in comparison to `relative()`. It will be a purely lexical operation. If the `path` to be normalised exists on the filesystem (and therefore my include symlinks) then `canonical()` is the best approach to normalisation.
+
+`normalize()` and `canonical()` both have value in specifying the effects of `relative()` which could vary depending on the existance or not of a `path`.
+
+This proposal believes that a single free-function `normalize()` is sufficient to provide the needed functionality but would not object to a `path` member instead, or as well as the free function.
+
+### 3.4 `remove_common_prefix` or `common_prefix`
+
+A common operation, and one that is often used in the implementation of `relative()` is a `remove_common_prefix()` or a `common_prefix()` function. This takes 2 or more `path` objects (depending on its specification) and returns a `path` object that represents the common prefix shared by all paths&mdash;if it exists.
+
+**TO BE COMPLETED****
+
 ## 4. Proposal
 
-The proposal is to add the following operations to ... **TODO**
+The proposal is to add the following operations to the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html).
+
+```cpp
+path normalize(const path& p) noexcept;
+
+path proximate(const path& p, const path& start = current_path());
+path proximate(const path& p, error_code& ec);
+path proximate(const path& p, const path& start, error_code& ec);
+
+path relative(const path& p, const path& start = current_path());
+path relative(const path& p, error_code& ec);
+path relative(const path& p, const path& start, error_code& ec);
+```
+
+**TO BE COMPLETED**
+
 
 ## 5. Proposed Wording
 
