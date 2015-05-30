@@ -63,11 +63,11 @@ This could return a `path`, if possible, that is relative to `start`. The implem
 The File System TS is based on the `​boost::filesystem` library and it too suffers from this anomaly. There are open tickets for this in ​Boost Trac:
 
   * [https://svn.boost.org/trac/boost/ticket/5897](#5897 Make path relative function)
-  * [https://svn.boost.org/trac/boost/ticket/1976​](#1976 Inverse function for complete)
+  * [https://svn.boost.org/trac/boost/ticket/1976](#1976 Inverse function for complete)
 
 and it is the subject of several posts on StackOverflow for example:
 
-  * ​[http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path](http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path)
+  * [http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path](http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path)
   * [http://stackoverflow.com/questions/5772992/get-relative-path-from-two-absolute-paths](http://stackoverflow.com/questions/5772992/get-relative-path-from-two-absolute-paths)
 
 ### 2.1 `relative`
@@ -178,7 +178,7 @@ If we assume we have a path `path` and a start directory `start` that we want to
 
   1. To obtain, if one exists, a **relative path** `rel_path` from `start` to `path` such that on exists we can say that `path` is equivalent to `start/rel_path`.
 
-  2. To obtain the the **nearest path** `nearest_path` from `start` to `path`. If a relative path from `start` to `path` exists then that will be the `nearest_path` otherwise `absolute(path)` will itself be the `nearest_path`.
+  2. To obtain the **nearest path** or **proximate path** `proximate`, from `start` to `path`. If a relative path from `start` to `path` exists then that will be the `proximate` path otherwise `absolute(path)` will itself be the `proximate` path. Essentially the `proximate` path is the shortest traversal from `start` to `path`.
 
 The solution to the second use-case can be implemented in terms of the first use-case. The implications of each use-case determine what should be returned in the event that no relative path exists.
 
@@ -206,7 +206,7 @@ The basic assumption is that should a relative path `rel_path` **from** the **st
 path == normalize(start/rel_path)
 ```
 
-This holds for all options shown. This proposal favours **Option 1** because it additionally allows general use to not result in an error. This is important for 2 reasons. First it paves the way to code such as the following (in reality you need to test `empty()`):
+This holds for all options shown. This proposal favours **Option 1** because it additionally allows general use to not result in an error minimising the extra code required wile retaining intuitive use. This is important as it paves the way to code such as the following (in reality you need to test `empty()`):
 
 ```cpp
 if( auto RelPath = relative( Path, Start ) )
@@ -219,20 +219,43 @@ else
 }
 ```
 
-and second it allows use-case 2 (**nearest path**) to be trivially implemented in terms of this use-case. For example:
+and also it allows use-case 2 (**proximate path**) to be trivially conceptualised in terms of `relative()`. For example:
 
 ```cpp
-path nearest_path( const path& Path, const path& Start )
+path proximate( const path& Path, const path& Start )
 {
-    if( auto RelPath = relative( Path, Start ) )
-    {
-        return RelPath;
-    }
+    if( auto RelPath = relative( Path, Start ) ) return RelPath;
     return Path;
 }
 ```
 
-In fact unless `operator bool` is added to `path` to indicate whether a `path` is `empty()` or not the previous example would need to be rewritten in terms of `empty()`.
+In fact unless `operator bool` is added to `path` to indicate whether a `path` is `empty()` or not the previous example would need to be rewritten in terms of `empty()`. This would be the slightly less intuitive, but equally trivial:
+
+```cpp
+path proximate( const path& Path, const path& Start )
+{
+    auto RelPath = relative( Path, Start );
+    return RelPath.empty() ? Path : RelPath;
+}
+```
+
+A similar implementation of `proximate()` using **Option 2** or **Option 3** might look as follows:
+
+```cpp
+path proximate( const path& Path, const path& Start )
+{
+    error_code Error;
+    auto RelPath = relative( Path, Start, Error );
+    if( Error && Error != no_relative_path )
+    {
+        // Only if relative() can return other 
+        // errors otherwise we can just use:
+        // error_code DontCare;
+    }
+    return RelPath.empty() ? Path : RelPath;
+}
+```
+
 
 ## 4. Proposal
 
