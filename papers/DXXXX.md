@@ -18,12 +18,12 @@ This paper proposes the addition of several convenience functions to the [File S
   * [2. Motivation and Scope](#2-motivation-and-scope)
       * [2.1 `relative`](#21-relative)
       * [2.2 `normalize`](#22-normalize)
-      * [2.3 `remove_common_prefix`](#23-remove_common_prefix)
+      * [2.3 `remove_common_prefix` and `common_prefix`](#23-remove_common_prefix-and-common-prefix)
   * [3. Design Discussion](#3-design-discussion)
       * [3.1 Free function *operations* or `path` members or both](#31-free-function-operations-or-path-members-or-both)
       * [3.2 `relative`](#32-relative)
       * [3.3 `normalize`](#33-normalize)
-      * [3.4 `remove_common_prefix` or `common_prefix`](#34-remove_common_prefix-or-common_prefix)
+      * [3.4 `remove_common_prefix` and `common_prefix`](#34-remove_common_prefix-and-common_prefix)
   * [4. Proposal](#4-proposal)
   * [5. Proposed Wording](#5-proposed-wording)
   * [6. Reference Implementation](#6-reference-implementation)
@@ -222,7 +222,7 @@ The rationale for the removal of `normalize()` (and `canonize()` which was also 
 
 However both functions are hugely useful and also specifiable. In fact `canonical()` is part of the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html). `normalize()` is most useful when considered in the context of a relative path which does not represent a real path on the filesystem. Consider the question of creating path from a base path and a relative path - lexically. `normalize()` is required in order to create an easily interpreted representation.
 
-### 2.3 `remove_common_prefix`
+### 2.3 `remove_common_prefix` and `common_prefix`
 
 Lastly the implementation `relative` generally requires a function that can remove a common prefix, or at least return the common prefix from a number of paths passed to it. In the case of `relative` that would be `path` and `start` but in the general case it could be a range of paths. Python provides a function that is similar but flawed in that it only compares character-by-character allowing invalid paths to be returned.
 
@@ -374,13 +374,26 @@ There is often a desire to restrict the behaviour of `relative()` and `proximate
   2.  Provide alternatively named free-functions that are lexical-only (**bikeshed warning**). Possible names (considering `relative` only for simplicity) might be `make_relative()`, `relative_path()`, `lexical_relative()` and so on.
   3.  The last option is to specify a tag of some description that is passed to `relative()` and `proximate()` that controls whether the operation is lexcial-only. At this time it appears that the motivating use-case for this is simply lexical, or not. Other specific use cases (such as normalising paths first but not resolving symlinks) are best left to the user to build on top of a lexical-only function. If that is the case this could essentially be a `bool` flag.
 
+One thing to consider is that having separate lexical-only functions may allow a more optimal specification (for example `noexcept`) and a more optimal implementation when compared to a flag based approach.
+
 #### 3.2.5 Controlling base path for relative paths
 
 Rather than adding a separate `base` parameter to handle relative paths that are passed to `relative()` or `proximate()`, complicating the interface (`current_path()` would be the default) it is expected that users would first wrap the paths passed with `absolute()` and specify the required `base` path at that point.
 
 #### 3.2.6 Just Working
 
-**TODO** (in the presence of paths or not)
+Setting aside the case of lexical-only versions for `relative()` and `proximate()` it is worth noting that there are a number of possibilities to consider when paths may or may not exist on the filesystem. Given two paths `p1` and `p2` we can say that:
+
+  1. `exists(p1)` may or may not be `true`
+  2. `exists(p2)` may or may not be `true`
+  3. `normalize(p1)` may or may not equal `p1`
+  4. `normalize(p2)` may or may not equal `p2`
+  5. `absolute(normalize(p1)` may or may not equal `canonical(p1)`
+  6. `absolute(normalize(p2)` may or may not equal `canonical(p2)`
+  7. `p1.is_relative()` may or may not be `true`
+  8. `p2.is_relative()` may or may not be `true`
+
+In fact there are quite a few possibilities that make it hard correctly right a `relative()` (and hence `proximate()`) function. Except in the case where a lexical-only analysis is desired it is expected that the function should "just work". That is, should the paths exist on the filesystem and (say) contain symlinks then any resultant relative path that is identified must be capable of successfully navigating from the start path to the path provided. Given the combinations outlined in the previous list we can see that it is important to correctly specify and implement `relative()` so that it does indeed do the right thing. It is not sufficient to provide just a lexical-only operation and ask poeple to implement a functional `relative()` function on top of it. It is far too easy to get it wrong and getting it right is not a casually trivial implementation.
 
 ### 3.3 `normalize`
 
@@ -390,17 +403,24 @@ The specification of a `normalize()` free function, member or both is relatively
 
 This proposal believes that a single free-function `normalize()` is sufficient to provide the needed functionality but would not object to a `path` member instead, or as well as the free function.
 
-### 3.4 `remove_common_prefix` or `common_prefix`
+### 3.4 `remove_common_prefix` and `common_prefix`
 
-A common operation, and one that is often used in the implementation of `relative()` is a `remove_common_prefix()` or a `common_prefix()` function. This takes 2 or more `path` objects (depending on its specification) and returns a `path` object that represents the common prefix shared by all paths&mdash;if it exists.
+Identifying (and in many cases removing) a common path prefix shared between mutliple paths is a common operation, and one that is often used in the implementation of `relative()`. Typically these functions would take two or more `path` objects (depending on their specification) and return a `path` object that represents the common prefix shared by all passed paths&mdash;if one exists. Such functions could be named `remove_common_prefix()`&mdash;for the case where the prefix is removed from paths passed, and `common_prefix()`&mdash;for the case where the paths passed are left unchanged. 
 
-**TO BE COMPLETED**
+It makes sense for a `common_prefix()` to provide overloads for both `std::initializer_list<path>` and one taking a pair of `InputIterator`s. It also seems to make sense to provide for the most common use-cas, a pair of paths, and so provide an overload taking two paths by `const` reference.
+
+The `remove_common_prefix()` variant is a little more restricted due to the need to remove any common prefix from the paths that are passed. This rules out having a `std::initializer_list<path>` overload. The iterator overload would be similar `common_prefix()` except that it would of course take an additional `OutputIterator` parameter. Again providing an overload for the two path common case makes a lot of sense given the additional effort required to utilise the iterator interface.
 
 ## 4. Proposal
 
 The proposal is to add the following operations to the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html).
 
 ```cpp
+path common_prefix( const path& p1, const path& p2 );
+template<class InputIteratorT>
+  path common_prefix( InputIterator first, InputIterator last );
+path common_prefix( initializer_list<path> ); 
+
 path normalize(const path& p) noexcept;
 
 path proximate(const path& p, const path& start = current_path());
@@ -410,6 +430,10 @@ path proximate(const path& p, const path& start, error_code& ec);
 path relative(const path& p, const path& start = current_path());
 path relative(const path& p, error_code& ec);
 path relative(const path& p, const path& start, error_code& ec);
+
+path remove_common_prefix( path& p1, path& p2 );
+template<class InputIterator, class OutputIterator>
+  path remove_common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 ```
 
 **TO BE COMPLETED**
