@@ -432,6 +432,8 @@ path relative(const path& p, error_code& ec);
 path relative(const path& p, const path& start, error_code& ec);
 
 path remove_common_prefix( path& p1, path& p2 );
+template <class ForwardIterator>
+  path remove_common_prefix( ForwardIterator first, ForwardIterator last );
 template<class InputIterator, class OutputIterator>
   path remove_common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 ```
@@ -479,6 +481,8 @@ path relative(const path& p, error_code& ec);
 path relative(const path& p, const path& start, error_code& ec);
 
 path remove_common_prefix( path& p1, path& p2 );
+template <class ForwardIterator>
+  path remove_common_prefix( ForwardIterator first, ForwardIterator last );
 template<class InputIterator, class OutputIterator>
   path remove_common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 ```
