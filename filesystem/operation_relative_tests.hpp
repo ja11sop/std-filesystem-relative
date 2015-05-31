@@ -27,9 +27,11 @@ void test_relative( const path_t& Path, const path_t& Start )
     BOOST_TEST_MESSAGE( "Path       = " << Path );
     BOOST_TEST_MESSAGE( "Start      = " << Start );
 
-    auto Relative = relative( Path, Start );
+    auto Relative  = relative( Path, Start );
+    auto Proximate = Relative ? Relative : Path;
 
     BOOST_TEST_MESSAGE( "Relative   = " << Relative );
+    BOOST_TEST_MESSAGE( "Proximate  = " << Proximate );
 
     if( exists( Path ) && exists( Start ) )
     {
@@ -57,7 +59,6 @@ void test_relative( const path_t& Path, const path_t& Start )
         BOOST_TEST_MESSAGE( "Normalized = " << Normalized );
 
         BOOST_CHECK( Relative.empty() != ( Normalized == RealPath ) );
-
     }
 }
 
@@ -622,7 +623,6 @@ void test_paper_paths()
     test_relative( "//C_drive/y", "//C_drive/x" );
     test_relative( "//D_drive/y", "//C_drive/x" );
 }
-
 
 
 // G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G G

@@ -203,6 +203,88 @@ public:
         return *this;
     }
 
+    path& make_normal()
+    {
+        static const path dot(".");
+        static const path dotdot("..");
+
+        path norm_p;
+        bool relative = true;
+
+        for( const auto& elem : *this )
+        {
+            if( elem == dot )
+            {
+                continue;
+            }
+            else if( elem == dotdot )
+            {
+                if( relative )
+                {
+                    norm_p /= dotdot;
+                }
+                else
+                {
+                    norm_p = norm_p.parent_path();
+                    if( norm_p.empty() )
+                    {
+                        relative = true;
+                    }
+                }
+            }
+            else
+            {
+                relative = false;
+                norm_p /= elem;
+            }
+        }
+        *this = std::move( norm_p );
+        return *this;
+    }
+
+    path& make_proximate(const path& start)
+    {
+        static const path dot(".");
+        static const path dotdot("..");
+
+        auto p_elem = begin();
+        auto p_end  = end();
+
+        auto start_elem = start.begin();
+        auto start_end  = start.end();
+
+        if( *p_elem != *start_elem )
+        {
+            return *this;
+        }
+
+        for( ; p_elem != p_end && start_elem != start_end; ++p_elem, ++start_elem )
+        {
+            if( *p_elem != *start_elem )
+            {
+                break;
+            }
+        }
+
+        path relative_path;
+
+        if( start_elem == start_end )
+        {
+            relative_path /= dot;
+        }
+        for( ; start_elem != start_end; ++start_elem )
+        {
+            relative_path /= dotdot;
+        }
+        for( ; p_elem != p_end; ++p_elem )
+        {
+            relative_path /= *p_elem;
+        }
+
+        *this = std::move( relative_path );
+        return *this;
+    }
+
     // decomposition
     path root_name() const
     {
@@ -237,6 +319,11 @@ public:
         return base::extension();
     }
 
+    // query
+    explicit operator bool() const noexcept
+    {
+        return !empty();
+    }
 };
 
 

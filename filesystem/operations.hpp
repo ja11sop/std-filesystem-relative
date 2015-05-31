@@ -10,7 +10,8 @@
 #include <boost/filesystem.hpp>
 
 // C++ Standard Library Includes
-// None
+#include <initializer_list>
+#include <functional>
 
 
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
@@ -19,59 +20,140 @@ namespace filesystem {
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
 
 
-inline
-path
-remove_common_prefix( path& p1, path& p2 )
+using path_t = xstd::filesystem::path;
+
+
+template<class InputIteratorT>
+auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
 {
-    auto p1_elem = p1.begin();
-    auto p1_end  = p1.end();
+    using iter_range_t = std::pair<path_t::iterator, path_t::iterator>;
+    std::vector<iter_range_t> Ranges;
 
-    auto p2_elem = p2.begin();
-    auto p2_end  = p2.end();
-
-    if( *p1_elem != *p2_elem )
+    const path_t& Elem = *First;
+    if( Elem.begin()->empty() )
     {
-        return path();
+        return std::make_pair( path_t(), std::move( Ranges ) );
     }
 
-    path common_path;
-    for( ; p1_elem != p1_end && p2_elem != p2_end; ++p1_elem, ++p2_elem )
+    for( ; First != Last; ++First )
     {
-        if( *p1_elem == *p2_elem )
+        const path_t& Path = *First;
+        Ranges.emplace_back( std::make_pair( Path.begin(), Path.end() ) );
+    }
+
+    auto increment = [&]() mutable
+    {
+        for( auto& Range: Ranges )
         {
-            common_path /= *p1_elem;
+            std::cout << *Range.first << std::endl;
+            ++(Range.first);
+        }
+    };
+
+    auto not_at_end = [&]() mutable
+    {
+        for( auto& Range: Ranges )
+        {
+            if( Range.first == Range.second )
+            {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    path_t Common;
+    for( ; not_at_end(); increment() )
+    {
+        auto MatchIter = Ranges.begin()->first;
+        bool Matches = true;
+        for( auto& Range: Ranges )
+        {
+            auto ElementIter = Range.first;
+            if( *MatchIter != *ElementIter )
+            {
+                Matches = false;
+                break;
+            }
+        }
+        if( Matches )
+        {
+            Common /= *MatchIter;
         }
         else break;
     }
+    return std::make_pair( Common, std::move(Ranges) );
+}
 
-    path trimmed_p1;
-    path trimmed_p2;
 
-    for( ; p1_elem != p1_end; ++p1_elem )
+template <class InputIterator, class OutputIterator>
+path_t
+remove_common_prefix( InputIterator First, InputIterator Last, OutputIterator Out )
+{
+    auto Result = common_prefix_helper( First, Last );
+
+    auto& Common = Result.first;
+    auto& Ranges = Result.second;
+
+    auto Range = Ranges.begin();
+    auto End   = Ranges.end();
+
+    for( ; Range != End; ++Range, ++Out )
     {
-        trimmed_p1 /= *p1_elem;
+        path_t Trimmed;
+        auto Element = Range->first;
+        for( ; Element != Range->second; ++Element )
+        {
+            Trimmed /= *Element;
+        }
+        path_t& Path = *Out;
+        Path = std::move( Trimmed );
     }
-
-    for( ; p2_elem != p2_end; ++p2_elem )
-    {
-        trimmed_p2 /= *p2_elem;
-    }
-
-    p1 = trimmed_p1;
-    p2 = trimmed_p2;
-
-    return common_path;
+    return Common;
 }
 
 
 inline
-path
-normalize( const path& p )
+path_t
+common_prefix( const path_t& p1, const path_t& p2 )
 {
-    static const path dot(".");
-    static const path dotdot("..");
+    std::array<std::reference_wrapper<const path_t>, 2> Paths = { p1, p2 };
+    return common_prefix_helper( Paths.begin(), Paths.end() ).first;
+}
 
-    path norm_p;
+
+template<class InputIteratorT>
+auto common_prefix( InputIteratorT First, InputIteratorT Last )
+{
+    return common_prefix_helper( First, Last ).first;
+}
+
+
+inline
+path_t
+common_prefix( std::initializer_list<path_t> List )
+{
+    return common_prefix_helper( List.begin(), List.end() ).first;
+}
+
+
+inline
+path_t
+remove_common_prefix( path_t& p1, path_t& p2 )
+{
+    std::array<std::reference_wrapper<path_t>, 2> Paths = { p1, p2 };
+    return remove_common_prefix( Paths.begin(), Paths.end(), Paths.begin() );
+}
+
+
+inline
+path_t
+normalize( const path_t& p )
+{
+    static const path_t dot(".");
+    static const path_t dotdot("..");
+
+    path_t norm_p;
     bool relative = true;
 
     for( const auto& elem : p )
@@ -106,11 +188,11 @@ normalize( const path& p )
 
 
 inline
-path
-relative_to( const path& p, const path& start )
+path_t
+relative_to( const path_t& p, const path_t& start )
 {
-    static const path dot(".");
-    static const path dotdot("..");
+    static const path_t dot(".");
+    static const path_t dotdot("..");
 
     auto p_elem = p.begin();
     auto p_end  = p.end();
@@ -120,7 +202,7 @@ relative_to( const path& p, const path& start )
 
     if( *p_elem != *start_elem )
     {
-        return path();
+        return path_t();
     }
 
     for( ; p_elem != p_end && start_elem != start_end; ++p_elem, ++start_elem )
@@ -131,7 +213,7 @@ relative_to( const path& p, const path& start )
         }
     }
 
-    path relative_path;
+    path_t relative_path;
 
     if( start_elem == start_end )
     {
@@ -151,16 +233,16 @@ relative_to( const path& p, const path& start )
 
 
 inline
-path
-relativise( const path& p, const path& start )
+path_t
+relativise( const path_t& p, const path_t& start )
 {
     return relative_to( normalize( absolute( p ) ), normalize( absolute( start ) ) );
 }
 
 
 inline
-path
-relative( const path& p, const path& start, boost::system::error_code& ec )
+path_t
+relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
 {
     auto real_p = p;
     auto real_start = start;
@@ -188,7 +270,7 @@ relative( const path& p, const path& start, boost::system::error_code& ec )
         common_path = canonical( common_path, ec );
         if( ec )
         {
-            return path();
+            return path_t();
         }
     }
 
@@ -202,12 +284,12 @@ relative( const path& p, const path& start, boost::system::error_code& ec )
         if( !is_directory( start ) )
         {
             ec.assign( boost::system::errc::not_a_directory, boost::system::generic_category() );
-            return path();
+            return path_t();
         }
         real_start = canonical( real_start, ec );
         if( ec )
         {
-            return path();
+            return path_t();
         }
     }
     else
@@ -225,7 +307,7 @@ relative( const path& p, const path& start, boost::system::error_code& ec )
         real_p = canonical( p, ec );
         if( ec )
         {
-            return path();
+            return path_t();
         }
     }
     else
@@ -239,16 +321,16 @@ relative( const path& p, const path& start, boost::system::error_code& ec )
 
 
 inline
-path
-relative( const path& p, boost::system::error_code& ec )
+path_t
+relative( const path_t& p, boost::system::error_code& ec )
 {
     return relative( p, current_path(), ec );
 }
 
 
 inline
-path
-relative( const path& p, const path& start = current_path() )
+path_t
+relative( const path_t& p, const path_t& start = current_path() )
 {
     boost::system::error_code local_ec;
     auto result = relative( p, start, local_ec );
