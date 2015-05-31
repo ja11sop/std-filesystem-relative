@@ -463,6 +463,11 @@ by adding the operational functions after `canonical`:
 
 ----
 ```cpp
+path common_prefix( const path& p1, const path& p2 );
+template<class InputIteratorT>
+  path common_prefix( InputIterator first, InputIterator last );
+path common_prefix( initializer_list<path> ); 
+
 path normalize(const path& p) noexcept;
 
 path proximate(const path& p, const path& start = current_path());
@@ -472,6 +477,10 @@ path proximate(const path& p, const path& start, error_code& ec);
 path relative(const path& p, const path& start = current_path());
 path relative(const path& p, error_code& ec);
 path relative(const path& p, const path& start, error_code& ec);
+
+path remove_common_prefix( path& p1, path& p2 );
+template<class InputIterator, class OutputIterator>
+  path remove_common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 ```
 ----
 
@@ -498,7 +507,7 @@ path relative(const path& p, error_code& ec);
 path relative(const path& p, const path& start, error_code& ec);
 ```
 
-  * *Overview:* Return a relative path of `p` to the current directory or from an optional `start` path.
+  * *Overview:* Return a relative path to `p` from the current directory or from an optional `start` path.
 
   * *Returns:* A relative path, if the paths share a common 'root-name', otherwise `path()`. The relative path returned will satisfy the conditions shown in the following list. The `common` path is the common path that is shared between `p` and `start`. `rel_p` and `rel_start` are the divergent relative paths that remain after the `common` path is removed.
     * if `exists(start)`
