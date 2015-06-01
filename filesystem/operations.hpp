@@ -86,6 +86,14 @@ auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
 }
 
 
+template <class ForwardIterator>
+path_t
+remove_common_prefix( ForwardIterator First, ForwardIterator Last )
+{
+    return remove_common_prefix( First, Last, First );
+}
+
+
 template <class InputIterator, class OutputIterator>
 path_t
 remove_common_prefix( InputIterator First, InputIterator Last, OutputIterator Out )
@@ -189,7 +197,7 @@ normalize( const path_t& p )
 
 inline
 path_t
-relative_to( const path_t& p, const path_t& start )
+lexically_relative( const path_t& p, const path_t& start )
 {
     static const path_t dot(".");
     static const path_t dotdot("..");
@@ -231,14 +239,12 @@ relative_to( const path_t& p, const path_t& start )
     return relative_path;
 }
 
-
-inline
-path_t
-relativise( const path_t& p, const path_t& start )
-{
-    return relative_to( normalize( absolute( p ) ), normalize( absolute( start ) ) );
-}
-
+//inline
+//path_t
+//relativise( const path_t& p, const path_t& start )
+//{
+//    return lexically_relative( normalize( absolute( p ) ), normalize( absolute( start ) ) );
+//}
 
 inline
 path_t
@@ -315,7 +321,7 @@ relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
         real_p = common_path / rel_p;
     }
     ec.clear();
-    return relative_to( real_p, real_start );
+    return lexically_relative( real_p, real_start );
     // How about: return real_p.make_relative( real_start ); ?
 }
 
@@ -345,6 +351,48 @@ relative( const path_t& p, const path_t& start = current_path() )
     return result;
 }
 
+
+inline
+path_t
+lexically_proximate( const path_t& p, const path_t& start )
+{
+    auto rel_path = lexically_relative( p, start );
+    return rel_path.empty() ? p : rel_path;
+}
+
+
+inline
+path_t
+proximate( const path_t& p, const path_t& start, boost::system::error_code& ec )
+{
+    auto rel_path = relative( p, start, ec );
+    return rel_path.empty() ? p : rel_path;
+}
+
+inline
+path_t
+proximate( const path_t& p, boost::system::error_code& ec )
+{
+    return proximate( p, current_path(), ec );
+}
+
+
+inline
+path_t
+proximate( const path_t& p, const path_t& start = current_path() )
+{
+    boost::system::error_code local_ec;
+    auto result = proximate( p, start, local_ec );
+    if( local_ec )
+    {
+        BOOST_FILESYSTEM_THROW
+        (   boost::filesystem::filesystem_error
+            (   "boost::filesystem::proximate",
+                p, start,
+                local_ec   )   );
+    }
+    return result;
+}
 
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
 }
