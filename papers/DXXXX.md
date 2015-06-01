@@ -79,7 +79,19 @@ and it is the subject of several posts on StackOverflow for example:
 
 ### 2.1 `relative`
 
-Other languages typically provide a similar function.
+The basic use case is:
+
+```cpp
+path Path  = "/a/d";
+path Start = "/a/b/c";
+
+auto RelPath = relative( Path, Start );
+
+assert( RelPath == path("../../d") );
+assert( Path == normalize( Start/RelPath ) );
+```
+
+Other languages typically provide a similar function. 
 
 #### 2.1.1 Python `relpath()`
 
@@ -139,9 +151,16 @@ func Rel(basepath, targpath string) (string, error)
 
 ### 2.2 `normalize`
 
-In addition to reason about relative paths in the context of asserting that an absolute path can be combined with a relative path to create a new absolute path we also need a `normalize` facilty.
+In addition to reason about relative paths in the context of asserting that an absolute path can be combined with a relative path to create a new absolute path we also need a `normalize` facilty. A basic use-case for this might be:
 
-Python and Java both provide their equivalents of this function. Note this is **not** the same as a `canonical` function. A `normalize` function is purely focused on the collapsing of redundant current "`.`", parent "`..`" and path separators at the lexical level. To achieve a normalised in the presence of a path that exists on the filesystem then `canonical` should be used.
+```cpp
+path Path = "/a/b/c/../.././d/."
+auto NormalPath = normalize( Path );
+
+assert( NormalPath == path("/a/d") );
+```
+
+Python and Java both provide their equivalents of this function. Note this is **not** the same as a `canonical` function. A `normalize` function is purely focused on the collapsing of redundant current "`.`", parent "`..`" and path separators at the lexical level. To achieve a normalised path in the presence of a path that exists on the filesystem then `canonical` should be used.
 
 #### 2.2.1 Python `normpath()`
 
@@ -224,7 +243,33 @@ However both functions are hugely useful and also specifiable. In fact `canonica
 
 ### 2.3 `remove_common_prefix` and `common_prefix`
 
-Lastly the implementation `relative` generally requires a function that can remove a common prefix, or at least return the common prefix from a number of paths passed to it. In the case of `relative` that would be `path` and `start` but in the general case it could be a range of paths. Python provides a function that is similar but flawed in that it only compares character-by-character allowing invalid paths to be returned.
+Lastly the implementation `relative` generally requires a function that can remove a common prefix, or at least return the common prefix from a number of paths passed to it. In the case of `relative` that would be `path` and `start` but in the general case it could be a range of paths.
+
+Example: `common_prefix()`:
+
+```cpp
+path Path1 = "/a/b/c/d/e/f";
+path Path2 = "/a/b/c/j/k";
+
+auto Common = common_prefix( Path1, Path2 );
+
+assert( Common = path("/a/b/c") );
+```
+
+Example: `remove_common_prefix()`:
+
+```cpp
+path Path1 = "/a/b/c/d/e/f";
+path Path2 = "/a/b/c/j/k";
+
+auto Common = remove_common_prefix( Path1, Path2 );
+
+assert( Common = path("/a/b/c") );
+assert( Path1 = path("d/e/f") );
+assert( Path2 = path("j/k") );
+```
+
+Python provides a function that is similar but flawed in that it only compares character-by-character allowing invalid paths to be returned.
 
 #### 2.3.1 Python `commonprefix()`
 
@@ -256,9 +301,23 @@ This section will focus on use cases for `relative()` (or indeed `relativize()`/
 
 If we assume we have a path `path` and a start directory `start` that we want to determine a relative path from, then there appear to be two main reasons to call `relative`:
 
-  1. To obtain, if one exists, a **relative path** `rel_path` from `start` to `path` such that on exists we can say that `path` is equivalent to `start/rel_path`.
+  1. To obtain, if one exists, a **relative path** `rel_path` from `start` to `path` such that on exists we can say that `path` is equivalent to `start/rel_path`. For example:
 
-  2. To obtain the **nearest path** or **proximate path** `proximate`, from `start` to `path`. If a relative path from `start` to `path` exists then that will be the `proximate` path otherwise `absolute(path)` will itself be the `proximate` path. Essentially the `proximate` path is the shortest traversal from `start` to `path`.
+| Path        | Start       | Relative Path     | 
+|:------------|-------------|-------------------|
+| `"/a/d"`    |  `"/a/b/c"` | `"../../d"`       | 
+| `"/a/b/c"`  |  `"/a/d"`   | `"../b/c"`        | 
+| `"C:\y"`    |  `"C:\x"`   | `"..\y"`          |
+| `"D:\y"`    |  `"C:\x"`   | no relative path  |
+
+  2. To obtain the **nearest path** or **proximate path** `proximate`, from `start` to `path`. If a relative path from `start` to `path` exists then that will be the `proximate` path otherwise `absolute(path)` will itself be the `proximate` path. Essentially the `proximate` path is the shortest traversal from `start` to `path`. For example:
+
+| Path        | Start       | Proximate Path    | 
+|:------------|-------------|-------------------|
+| `"/a/d"`    |  `"/a/b/c"` | `"../../d"`       | 
+| `"C:\y"`    |  `"C:\x"`   | `"..\y"`          |
+| `"D:\y"`    |  `"C:\x"`   | `"D:\y"`          |
+
 
 The solution to the second use-case can be implemented in terms of the first use-case. The implications of each use-case determine what should be returned in the event that no relative path exists.
 
@@ -323,7 +382,7 @@ In order to support **Option 2** and **Option 3** it would be necessary to addit
 
 ```cpp
 enum class filesystem_errc {
-    no_relative_path_exists = implementation defined
+    no_relative_path_exists = implementation defined non zero value
 };
 ```
 
