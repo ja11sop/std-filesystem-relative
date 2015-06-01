@@ -478,6 +478,8 @@ The proposal is to add the following operations to the [File System TS - N4099](
 path common_prefix( const path& p1, const path& p2 );
 template<class InputIteratorT>
   path common_prefix( InputIterator first, InputIterator last );
+template<class InputIterator, class OutputIterator>
+  path common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 path common_prefix( initializer_list<path> ); 
 
 path lexically_relative( const path& p, const path& start ) noexcept;
@@ -496,8 +498,6 @@ path relative(const path& p, const path& start, error_code& ec);
 path remove_common_prefix( path& p1, path& p2 );
 template <class ForwardIterator>
   path remove_common_prefix( ForwardIterator first, ForwardIterator last );
-template<class InputIterator, class OutputIterator>
-  path remove_common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 ```
 
 **TO BE COMPLETED**
@@ -530,6 +530,8 @@ by adding the operational functions after `canonical`:
 path common_prefix( const path& p1, const path& p2 );
 template<class InputIteratorT>
   path common_prefix( InputIterator first, InputIterator last );
+template<class InputIterator, class OutputIterator>
+  path common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 path common_prefix( initializer_list<path> ); 
 
 path lexically_relative( const path& p, const path& start ) noexcept;
@@ -548,8 +550,6 @@ path relative(const path& p, const path& start, error_code& ec);
 path remove_common_prefix( path& p1, path& p2 );
 template <class ForwardIterator>
   path remove_common_prefix( ForwardIterator first, ForwardIterator last );
-template<class InputIterator, class OutputIterator>
-  path remove_common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 ```
 ----
 
