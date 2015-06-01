@@ -51,7 +51,7 @@ void test_remove_common_prefix_from_several_paths()
         Paths.push_back( Common / Path );
     }
 
-    auto Prefix = boost::filesystem::remove_common_prefix( Paths.begin(), Paths.end(), Paths.begin() );
+    auto Prefix = boost::filesystem::common_prefix( Paths.begin(), Paths.end(), Paths.begin() );
 
     BOOST_CHECK( Prefix == Common );
 

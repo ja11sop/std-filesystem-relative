@@ -20,12 +20,10 @@ namespace filesystem {
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
 
 
-// TODO: Make ec functions noexcept
-// TODO: In ec functions use ec version of current_path()
-
-
 using path_t = xstd::filesystem::path;
 
+
+// Helper function to make implementation easier - not part of the proposal
 
 template<class InputIteratorT>
 auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
@@ -45,7 +43,7 @@ auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
         Ranges.emplace_back( std::make_pair( Path.begin(), Path.end() ) );
     }
 
-    auto increment = [&]()
+    auto increment = [&Ranges]()
     {
         for( auto& Range: Ranges )
         {
@@ -53,7 +51,7 @@ auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
         }
     };
 
-    auto not_at_end = [&]()
+    auto not_at_end = [&Ranges]()
     {
         for( auto& Range: Ranges )
         {
@@ -86,17 +84,57 @@ auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
 }
 
 
+//! \brief  Return and remove a common prefix from the sequence of paths defined
+//!         by the range [first,last)
+//!
+//! \param  first - a ForwardIterator to the start of the range
+//!
+//! \param  last - a ForwardIterator to the end of the range
+//!
+//! \return a path representing the common prefix, if any, path() otherwise
+
 template <class ForwardIterator>
 path_t
 remove_common_prefix( ForwardIterator First, ForwardIterator Last )
 {
-    return remove_common_prefix( First, Last, First );
+    return common_prefix( First, Last, First );
 }
 
 
+//! \brief  Remove a common prefix from the paths passed as arguments
+//!
+//! \param  p1 - a path object
+//!
+//! \param  p2 - a path object
+//!
+//! \return a path representing the common prefix, if any, path() otherwise.
+//!         If a non-empty common prefix exists p1 and p2 will be changed to
+//!         relative paths with the common prefix removed.
+
+inline
+path_t
+remove_common_prefix( path_t& p1, path_t& p2 )
+{
+    std::array<std::reference_wrapper<path_t>, 2> Paths = { p1, p2 };
+    return remove_common_prefix( Paths.begin(), Paths.end() );
+}
+
+
+//! \brief  Return a common prefix from the sequence of paths defined
+//!         by the range [first,last) and place the remaining relative
+//!         in out
+//!
+//! \param  first - an InputIterator to the start of the range
+//!
+//! \param  last  - an InputIterator to the end of the range
+//!
+//! \param  out   - an OutputIterator to the start of the output range
+//!
+//! \return a path representing the common prefix, if any, path() otherwise
+
 template <class InputIterator, class OutputIterator>
 path_t
-remove_common_prefix( InputIterator First, InputIterator Last, OutputIterator Out )
+common_prefix( InputIterator First, InputIterator Last, OutputIterator Out )
 {
     auto Result = common_prefix_helper( First, Last );
 
@@ -120,6 +158,13 @@ remove_common_prefix( InputIterator First, InputIterator Last, OutputIterator Ou
     return Common;
 }
 
+//! \brief  Return a common prefix from the paths `p1` and `p2`
+//!
+//! \param  p1 - a path object
+//!
+//! \param  p2 - a path object
+//!
+//! \return a path representing the common prefix, if any, path() otherwise
 
 inline
 path_t
@@ -129,6 +174,14 @@ common_prefix( const path_t& p1, const path_t& p2 )
     return common_prefix_helper( Paths.begin(), Paths.end() ).first;
 }
 
+//! \brief  Return a common prefix from the sequence of paths defined
+//!         by the range [first,last)
+//!
+//! \param  first - an InputIterator to the start of the range
+//!
+//! \param  last  - an InputIterator to the end of the range
+//!
+//! \return a path representing the common prefix, if any, path() otherwise
 
 template<class InputIteratorT>
 auto common_prefix( InputIteratorT First, InputIteratorT Last )
@@ -136,6 +189,12 @@ auto common_prefix( InputIteratorT First, InputIteratorT Last )
     return common_prefix_helper( First, Last ).first;
 }
 
+//! \brief  Return a common prefix from the sequence of paths referred to
+//!         by the initializer_list<path>
+//!
+//! \param  list - an initializer_list of paths
+//!
+//! \return a path representing the common prefix, if any, path() otherwise
 
 inline
 path_t
@@ -145,14 +204,13 @@ common_prefix( std::initializer_list<path_t> List )
 }
 
 
-inline
-path_t
-remove_common_prefix( path_t& p1, path_t& p2 )
-{
-    std::array<std::reference_wrapper<path_t>, 2> Paths = { p1, p2 };
-    return remove_common_prefix( Paths.begin(), Paths.end(), Paths.begin() );
-}
-
+//! \brief  Return a normalized path by collapsing all redundant
+//!         current ".", parent ".." directory elements and
+//!         directory-separator elements
+//!
+//! \param  p - the path that we want a normalized path of
+//!
+//! \return a path representing a normalized version of p
 
 inline
 path_t
@@ -194,6 +252,20 @@ normalize( const path_t& p )
     return norm_p;
 }
 
+
+//! \brief  Return a relative path from `start` to `p` if one
+//!         exists. This is a lexical-only analysis
+//!
+//! \param  p - the path we want a relative path to
+//!
+//! \param  start - the path that we want the relative path from
+//!
+//! \return a path representing a relative path from `start` to `p`
+//!         if one exists, `path()` otherwise. If `p` and `start` are
+//!         the same then `"."` is returned. If a non-empty path is
+//!         returned then it will satisfy:
+//!
+//!         `p == normalize( start / lexically_relative( p, start ) )`
 
 inline
 path_t
@@ -239,12 +311,31 @@ lexically_relative( const path_t& p, const path_t& start )
     return relative_path;
 }
 
-//inline
-//path_t
-//relativise( const path_t& p, const path_t& start )
-//{
-//    return lexically_relative( normalize( absolute( p ) ), normalize( absolute( start ) ) );
-//}
+
+//! \brief Return a relative path to `p` from the current
+//!        directory or from an optional `start` path.
+//!
+//! \param  `p` - the path we want a relative path to
+//!
+//! \param  `start` - the path that we want the relative path from
+//!
+//! \return A relative path, if the paths share a common 'root-name',
+//!         otherwise `path()`. The relative path returned will satisfy
+//!         the conditions shown in the following list. The common
+//!         path is the common path that is shared between `p` and `start`.
+//!         `rel_p` and `rel_start` are the divergent relative paths that
+//!         remain after the common path is removed.
+//!
+//!         * if `exists(start)`
+//!           * if `exists(p)` then `equivalent(start/relative(p,start),p) == true`
+//!           * else `normalize(canonical(start)/relative(p,start)) == canonical(common)/normalize(rel_p)`
+//!         * else
+//!           * if `exists(p)` then `normalize(canonical(common)/rel_start)/relative(p,start)) == canonical(p)`
+//!           * else `normalize(start/relative(p,start)) == normalize(p)`
+//!
+//! \throw As specified in Error reporting.
+//!
+//! \note `exists(start) && !is_directory(start)` is an error.
 
 inline
 path_t
@@ -280,7 +371,7 @@ relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
         }
     }
 
-    path_exists = exists( start );
+    path_exists = exists( start, ec );
     if( ec )
     {
         ec.clear();
@@ -303,7 +394,7 @@ relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
         real_start = common_path / rel_start;
     }
 
-    path_exists = exists( p );
+    path_exists = exists( p, ec );
     if( ec )
     {
         ec.clear();
@@ -320,19 +411,70 @@ relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
     {
         real_p = common_path / rel_p;
     }
-    ec.clear();
     return lexically_relative( real_p, real_start );
-    // How about: return real_p.make_relative( real_start ); ?
 }
 
+
+//! \brief Return a relative path to `p` from the current
+//!        directory or from an optional `start` path.
+//!
+//! \param  `p` - the path we want a relative path to
+//!
+//! \return A relative path, if the paths share a common 'root-name',
+//!         otherwise `path()`. The relative path returned will satisfy
+//!         the conditions shown in the following list. The common
+//!         path is the common path that is shared between `p` and `start`.
+//!         `rel_p` and `rel_start` are the divergent relative paths that
+//!         remain after the common path is removed.
+//!
+//!         * if `exists(start)`
+//!           * if `exists(p)` then `equivalent(start/relative(p,start),p) == true`
+//!           * else `normalize(canonical(start)/relative(p,start)) == canonical(common)/normalize(rel_p)`
+//!         * else
+//!           * if `exists(p)` then `normalize(canonical(common)/rel_start)/relative(p,start)) == canonical(p)`
+//!           * else `normalize(start/relative(p,start)) == normalize(p)`
+//!
+//! \throw As specified in Error reporting.
+//!
+//! \note `exists(start) && !is_directory(start)` is an error.
 
 inline
 path_t
 relative( const path_t& p, boost::system::error_code& ec )
 {
-    return relative( p, current_path(), ec );
+    auto start = current_path( ec );
+    if( ec )
+    {
+        return path_t();
+    }
+    return relative( p, start, ec );
 }
 
+
+//! \brief Return a relative path to `p` from the current
+//!        directory or from an optional `start` path.
+//!
+//! \param  `p` - the path we want a relative path to
+//!
+//! \param  `start` - the path that we want the relative path from
+//!
+//! \return A relative path, if the paths share a common 'root-name',
+//!         otherwise `path()`. The relative path returned will satisfy
+//!         the conditions shown in the following list. The common
+//!         path is the common path that is shared between `p` and `start`.
+//!         `rel_p` and `rel_start` are the divergent relative paths that
+//!         remain after the common path is removed.
+//!
+//!         * if `exists(start)`
+//!           * if `exists(p)` then `equivalent(start/relative(p,start),p) == true`
+//!           * else `normalize(canonical(start)/relative(p,start)) == canonical(common)/normalize(rel_p)`
+//!         * else
+//!           * if `exists(p)` then `normalize(canonical(common)/rel_start)/relative(p,start)) == canonical(p)`
+//!           * else `normalize(start/relative(p,start)) == normalize(p)`
+//!
+//! \throw As specified in Error reporting.
+//!
+//! \note `exists(start) && !is_directory(start)` is an error.
 
 inline
 path_t
@@ -352,6 +494,16 @@ relative( const path_t& p, const path_t& start = current_path() )
 }
 
 
+//! \brief  Return a proximate path from `start` to `p`.
+//!         This is a lexical-only analysis
+//!
+//! \param  p - the path we want a proximate path to
+//!
+//! \param  start - the path that we want the proximate path from
+//!
+//! \return returns `lexically_relative( p, start )` if it exists,
+//!         otherwise `p`
+
 inline
 path_t
 lexically_proximate( const path_t& p, const path_t& start )
@@ -360,6 +512,31 @@ lexically_proximate( const path_t& p, const path_t& start )
     return rel_path.empty() ? p : rel_path;
 }
 
+
+//! \brief Return a proximate path to `p` from the current
+//!        directory or from an optional `start` path.
+//!
+//! \param  `p` - the path we want a proximate path to
+//!
+//! \param  `start` - the path that we want the proximate path from
+//!
+//! \return A relative path, if the paths share a common 'root-name',
+//!         otherwise `p`. The relative path returned will satisfy
+//!         the conditions shown in the following list. The common
+//!         path is the common path that is shared between `p` and `start`.
+//!         `rel_p` and `rel_start` are the divergent relative paths that
+//!         remain after the common path is removed.
+//!
+//!         * if `exists(start)`
+//!           * if `exists(p)` then `equivalent(start/relative(p,start),p) == true`
+//!           * else `normalize(canonical(start)/relative(p,start)) == canonical(common)/normalize(rel_p)`
+//!         * else
+//!           * if `exists(p)` then `normalize(canonical(common)/rel_start)/relative(p,start)) == canonical(p)`
+//!           * else `normalize(start/relative(p,start)) == normalize(p)`
+//!
+//! \throw As specified in Error reporting.
+//!
+//! \note `exists(start) && !is_directory(start)` is an error.
 
 inline
 path_t
@@ -373,7 +550,12 @@ inline
 path_t
 proximate( const path_t& p, boost::system::error_code& ec )
 {
-    return proximate( p, current_path(), ec );
+    auto start = current_path( ec );
+    if( ec )
+    {
+        return path_t();
+    }
+    return proximate( p, start, ec );
 }
 
 
