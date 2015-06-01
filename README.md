@@ -1,5 +1,9 @@
 # std-filesystem-relative
 
+## Draft Paper
+
+To read up on the background to this work please see the current latest [Draft Paper](blob/master/papers/DXXXX.md) for more details.
+
 ## Requirements
 
 The tests build using [Scons](http://www.scons.org/) with **[cuppa](https://github.com/ja11sop/cuppa)** therefore you need to [install Scons](http://www.scons.org/download.php). **[Cuppa](https://github.com/ja11sop/cuppa)** can be easily installed using pip:
