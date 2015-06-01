@@ -413,7 +413,7 @@ Given a path `Path` and a path `Start` which we want to determine the proximate 
 
 It is simplest to specify `proximate()` in terms of `relative()` so that handling of paths (same of different) for which a relative path exists can be handled consistently. Where no relative path exists then `Path` is returned:
 
-| Scenario                | Option 1                  |
+| Scenario                | Result                    |
 |:------------------------|---------------------------|
 | relative exists         | `relative( Path, Start )` |
 | no relative path        | `Path`                    |
@@ -480,6 +480,9 @@ template<class InputIteratorT>
   path common_prefix( InputIterator first, InputIterator last );
 path common_prefix( initializer_list<path> ); 
 
+path lexically_relative( const path& p, const path& start ) noexcept;
+path lexically_proximate( const path& p, const path& start ) noexcept;
+
 path normalize(const path& p) noexcept;
 
 path proximate(const path& p, const path& start = current_path());
@@ -528,6 +531,9 @@ path common_prefix( const path& p1, const path& p2 );
 template<class InputIteratorT>
   path common_prefix( InputIterator first, InputIterator last );
 path common_prefix( initializer_list<path> ); 
+
+path lexically_relative( const path& p, const path& start ) noexcept;
+path lexically_proximate( const path& p, const path& start ) noexcept;
 
 path normalize(const path& p) noexcept;
 
