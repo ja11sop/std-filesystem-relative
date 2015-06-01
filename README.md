@@ -2,7 +2,7 @@
 
 ## Draft Paper
 
-To read up on the background to this work please see the current latest [Draft Paper](blob/master/papers/DXXXX.md) for more details.
+To read up on the background to this work please see the current latest [Draft Paper](papers/DXXXX.md) for more details.
 
 ## Requirements
 
