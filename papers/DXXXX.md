@@ -448,10 +448,10 @@ Given that there are two clear and distinct use-cases and that there is a reason
 There is often a desire to restrict the behaviour of `relative()` and `proximate()` to a purely lexical operation. This is an important use case and should be supported. There are three ways in which this can be achieved:
 
   1.  Provide lexical-only member functions to `path`, say, `make_relative()` and `make_proximate()`, or `relative_from()` and `proximate_from()`. If such member functions were provided it may make sense to include a `make_normal()` or `normalize()` member also. 
-  2.  Provide alternatively named free-functions that are lexical-only (**bikeshed warning**). Possible names (considering `relative` only for simplicity) might be `make_relative()`, `relative_path()`, `lexical_relative()` and so on.
+  2.  Provide alternatively named free-functions that are lexical-only (**bikeshed warning**). Possible names (considering `relative` only for simplicity) might be `make_relative()`, `relative_path()`, `lexically_relative()` and so on.
   3.  The last option is to specify a tag of some description that is passed to `relative()` and `proximate()` that controls whether the operation is lexcial-only. At this time it appears that the motivating use-case for this is simply lexical, or not. Other specific use cases (such as normalising paths first but not resolving symlinks) are best left to the user to build on top of a lexical-only function. If that is the case this could essentially be a `bool` flag.
 
-One thing to consider is that having separate lexical-only functions may allow a more optimal specification (for example `noexcept`) and a more optimal implementation when compared to a flag based approach.
+Having separate lexical-only functions may allow a more optimal specification and a more optimal implementation when compared to a flag based approach. This proposal has favoured the second option. This feels more in keeping with other aspects of the library where the restrictive case is given the more precise name.
 
 #### 3.2.5 Controlling base path for relative paths
 
@@ -471,6 +471,68 @@ Setting aside the case of lexical-only versions for `relative()` and `proximate(
   8. `p2.is_relative()` may or may not be `true`
 
 In fact there are quite a few possibilities that make it hard correctly right a `relative()` (and hence `proximate()`) function. Except in the case where a lexical-only analysis is desired it is expected that the function should "just work". That is, should the paths exist on the filesystem and (say) contain symlinks then any resultant relative path that is identified must be capable of successfully navigating from the start path to the path provided. Given the combinations outlined in the previous list we can see that it is important to correctly specify and implement `relative()` so that it does indeed do the right thing. It is not sufficient to provide just a lexical-only operation and ask poeple to implement a functional `relative()` function on top of it. It is far too easy to get it wrong and getting it right is not a casually trivial implementation.
+
+As an example consider the following example implementation. It is certainly readable but not something you would want every user to have to write just to get correct behaviour:
+
+```cpp
+path
+relative( const path& p, const path& start, std::error_code& ec )
+{
+    auto real_p = p;
+    auto real_start = start;
+
+    if( real_p.is_relative() )
+        real_p = absolute( real_p );
+        
+    if( real_start.is_relative() )
+        real_start = absolute( real_start );
+
+    auto rel_p = normalize( real_p );
+    auto rel_start = normalize( real_start );
+    auto common_path = remove_common_prefix( rel_p, rel_start );
+
+    bool path_exists = exists( common_path, ec );
+    if( ec ) ec.clear();
+    
+    if( path_exists )
+    {
+        common_path = canonical( common_path, ec );
+        if( ec ) return path_t();
+    }
+
+    path_exists = exists( start, ec );
+    if( ec ) ec.clear();
+
+    if( path_exists )
+    {
+        if( !is_directory( start ) )
+        {
+            ec.assign( std::errc::not_a_directory, std::generic_category() );
+            return path_t();
+        }
+        real_start = canonical( real_start, ec );
+        if( ec ) return path_t();
+    }
+    else
+    {
+        real_start = common_path / rel_start;
+    }
+
+    path_exists = exists( p, ec );
+    if( ec ) ec.clear();
+    
+    if( path_exists )
+    {
+        real_p = canonical( p, ec );
+        if( ec ) return path_t();
+    }
+    else
+    {
+        real_p = common_path / rel_p;
+    }
+    return lexically_relative( real_p, real_start );
+}
+```
 
 ### 3.3 `normalize`
 
