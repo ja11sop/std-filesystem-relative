@@ -18,7 +18,7 @@ This paper proposes the addition of several convenience functions to the [File S
   * [2. Motivation and Scope](#2-motivation-and-scope)
       * [2.1 `relative`](#21-relative)
       * [2.2 `normalize`](#22-normalize)
-      * [2.3 `remove_common_prefix` and `common_prefix`](#23-remove_common_prefix-and-common-prefix)
+      * [2.3 `remove_common_prefix` and `common_prefix`](#23-remove_common_prefix-and-common_prefix)
   * [3. Design Discussion](#3-design-discussion)
       * [3.1 Free function *operations* or `path` members or both](#31-free-function-operations-or-path-members-or-both)
       * [3.2 `relative`](#32-relative)
@@ -345,7 +345,34 @@ The basic assumption is that should a relative path `RelPath` **from** the **sta
 Path == normalize(Start/RelPath)
 ```
 
-This holds for all options shown. **Option 1** is attractive because it additionally allows general use to not result in an error, minimising the extra code required while retaining intuitive use. This is important as it paves the way to code such as the following (in reality you need to test `empty()`):
+This holds for all options shown. 
+
+**Option 1** is attractive because it additionally allows general use to not result in an error, minimising the extra code required while retaining intuitive use. For example we can write code like this:
+
+```cpp
+auto RelPath = relative( Path, Start );
+
+if( !RelPath.empty() )
+{
+    // use relative path
+}
+else
+{
+    // perhaps use Path directly
+}
+```
+
+It allows use-case 2 (**proximate path**) to be trivially conceptualised in terms of `relative()`. For example:
+
+```cpp
+path proximate( const path& Path, const path& Start )
+{
+    auto RelPath = relative( Path, Start );
+    return RelPath.empty() ? Path : RelPath;
+}
+```
+
+Similarly it also paves the way to more *script-like* usage should `explicit operator bool` be added to `path` to indicate if a `path` is `empty()`. **This is not proposed** and is shown only for usage comparison with languages such as Python. For example we could write:
 
 ```cpp
 if( auto RelPath = relative( Path, Start ) )
@@ -357,24 +384,13 @@ else
     // use Path
 }
 ```
-
-and also it allows use-case 2 (**proximate path**) to be trivially conceptualised in terms of `relative()`. For example:
+or define `proximate()` as:
 
 ```cpp
 path proximate( const path& Path, const path& Start )
 {
     if( auto RelPath = relative( Path, Start ) ) return RelPath;
     return Path;
-}
-```
-
-In fact unless `operator bool` is added to `path` to indicate whether a `path` is `empty()` or not the previous example would need to be rewritten in terms of `empty()`. This would be the slightly less intuitive, but equally trivial:
-
-```cpp
-path proximate( const path& Path, const path& Start )
-{
-    auto RelPath = relative( Path, Start );
-    return RelPath.empty() ? Path : RelPath;
 }
 ```
 
@@ -402,6 +418,8 @@ path proximate( const path& Path, const path& Start )
     return RelPath.empty() ? Path : RelPath;
 }
 ```
+
+This is still acceptable but much more verbose and requires cherry-picking the `no_relative_path_exists` error code so that we may handle this error condition from other potential "real" errors.
 
 #### 3.2.2 Return value when asking for a proximate path
 
