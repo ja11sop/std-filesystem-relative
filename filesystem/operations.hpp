@@ -20,6 +20,10 @@ namespace filesystem {
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
 
 
+// TODO: Make ec functions noexcept
+// TODO: In ec functions use ec version of current_path()
+
+
 using path_t = xstd::filesystem::path;
 
 
@@ -41,23 +45,19 @@ auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
         Ranges.emplace_back( std::make_pair( Path.begin(), Path.end() ) );
     }
 
-    auto increment = [&]() mutable
+    auto increment = [&]()
     {
         for( auto& Range: Ranges )
         {
-            std::cout << *Range.first << std::endl;
             ++(Range.first);
         }
     };
 
-    auto not_at_end = [&]() mutable
+    auto not_at_end = [&]()
     {
         for( auto& Range: Ranges )
         {
-            if( Range.first == Range.second )
-            {
-                return false;
-            }
+            if( Range.first == Range.second ) return false;
         }
         return true;
     };
