@@ -37,7 +37,7 @@ The [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/
 * A decomposition method `relative_path()` is described in section **8.4.9 path decomposition [path.decompose]**
 * Two query methods to determine if a path either `has_relative_path()` or `is_relative()` described in **8.4.10 path query [path.query]**
 
-However there is no way to create a relative path as a path relative to another. Methods are however provided to create absolute and canonical paths.
+However **there is no way to create a relative path** as a path relative to another. Methods are however provided to create absolute and canonical paths.
 
 In section **15.1 Absolute [fs.op.absolute]**:
 
