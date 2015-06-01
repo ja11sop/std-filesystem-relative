@@ -490,7 +490,7 @@ The `remove_common_prefix()` variant is a little more restricted due to the need
 
 ## 4. Proposal
 
-The proposal is to add the following operations to the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html).
+In a nutsell the proposal is to add the following operations to the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html).
 
 ```cpp
 path common_prefix( const path& p1, const path& p2 );
@@ -500,10 +500,10 @@ template<class InputIterator, class OutputIterator>
   path common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 path common_prefix( initializer_list<path> ); 
 
-path lexically_relative( const path& p, const path& start ) noexcept;
-path lexically_proximate( const path& p, const path& start ) noexcept;
+path lexically_relative( const path& p, const path& start );
+path lexically_proximate( const path& p, const path& start );
 
-path normalize(const path& p) noexcept;
+path normalize(const path& p);
 
 path proximate(const path& p, const path& start = current_path());
 path proximate(const path& p, error_code& ec);
@@ -518,12 +518,9 @@ template <class ForwardIterator>
   path remove_common_prefix( ForwardIterator first, ForwardIterator last );
 ```
 
-**TO BE COMPLETED**
-
-
 ## 5. Proposed Wording
 
-**TO BE COMPLETED**
+This section offers tentative draft wording so that the impact on the [File System TS - N4099](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4099.html) can be better appreciated. 
 
 Insert the section:
 
@@ -541,7 +538,7 @@ Modify section:
 
 **6 Header <filesystem> synopsis [fs.filesystem.synopsis]**
 
-by adding the operational functions after `canonical`:
+by adding the operational functions shown in the appropriate alphabetical order:
 
 ----
 ```cpp
@@ -552,10 +549,10 @@ template<class InputIterator, class OutputIterator>
   path common_prefix( InputIterator first, InputIterator last, OutputIterator out );
 path common_prefix( initializer_list<path> ); 
 
-path lexically_relative( const path& p, const path& start ) noexcept;
-path lexically_proximate( const path& p, const path& start ) noexcept;
+path lexically_relative( const path& p, const path& start );
+path lexically_proximate( const path& p, const path& start );
 
-path normalize(const path& p) noexcept;
+path normalize(const path& p);
 
 path proximate(const path& p, const path& start = current_path());
 path proximate(const path& p, error_code& ec);
@@ -571,22 +568,93 @@ template <class ForwardIterator>
 ```
 ----
 
-Insert the section:
+Insert the sections:
 
 ----
-**15.3 Normalize [fs.op.normalize]**
+
+**15.3 Common Prefix [fs.op.common_prefix]**
 
 ```cpp
-path normalize(const path& p) noexcept;
+template <class InputIterator>
+  path common_prefix( InputIterator first, InputIterator last )
+```
+  * *Effects:* Return a common prefix from the sequence of paths defined by the range `[first,last)`
+
+  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+
+```cpp
+template <class InputIterator, class OutputIterator>
+  path common_prefix( InputIterator first, InputIterator last, OutputIterator out )
+```
+  * *Effects:* Return a common prefix from the sequence of paths defined by the range `[first,last)`. The remaining relative path for each path in the range is placed in `out`. The path placed in `out` for an input path `first` with a common prefix `common` shall satisy the expression `*first == normalize( common/*out )`. 
+
+  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+
+```cpp
+path common_prefix( std::initializer_list<path> )
+```
+  * *Effects:* Return a common prefix from the sequence of paths referred to by the `initializer_list<path>` object. 
+
+  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+
+```cpp
+path common_prefix( const path& p1, const path& p2 )
+```
+  * *Effects:* Return a common prefix for the paths `p1` and `p2`.
+
+  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+
+
+**15.27 Lexically Proximate [fs.op.lexically_proximate]**
+
+```cpp
+path lexically_proximate(const path& p, const path& start);
 ```
 
- * *Overview:*
-    Return a normalized path of `p` by collapsing all redundant current "`.`", parent "`..`" directory elements and directory-separator elements.
+  * *Effects:* Return the proximate path from `start` to `p`. This is a lexical-only analysis.
 
- * *Returns:*
-    A normalized path which may be relative or absolute, though it will not contain any current "`.`" directory element or any parent "`..`" directory elements after the first non-parent element.
+  * *Returns:* Returns as if by `lexically_relative( p, start ).empty() ? p : lexically_relative( p, start )`.
 
-**15.4 Relative [fs.op.relative]**
+
+**15.28 Lexically Relative [fs.op.lexically_relative]**
+
+```cpp
+path lexically_relative(const path& p, const path& start);
+```
+
+  * *Effects:* Return a relative path from `start` to `p` if one exists. This is a lexical-only analysis.
+
+  * *Returns:* A path representing a relative path from `start` to `p` if one exists, `path()` otherwise. If `p` and `start` are the same then `"."` is returned. If a non-empty path is returned then it will satisfy `p == normalize( start / lexically_relative( p, start ) )`.
+
+
+**15.29 Normalize [fs.op.normalize]**
+
+```cpp
+path normalize(const path& p);
+```
+ * *Effects:* Return a normalized path of `p` by collapsing all redundant current "`.`", parent "`..`" directory elements and directory-separator elements.
+
+ * *Returns:* A normalized path which may be relative or absolute, though it will not contain any current "`.`" directory element or any parent "`..`" directory elements after the first non-parent element.
+
+
+**15.31 Proximate [fs.op.proximate]**
+
+```cpp
+path proximate(const path& p, const path& start = current_path());
+path proximate(const path& p, error_code& ec);
+path proximate(const path& p, const path& start, error_code& ec);
+```
+
+  * *Effects:* Return a proximate path to `p` from the current directory or from an optional `start` path.
+
+  * *Returns:* Returns as if by `relative( p, start ).empty() ? p : relative( p, start )`.
+
+  * *Throws:* As specified in Error reporting.
+
+  * *Remarks:* `exists(start) && !is_directory(start)` is an error.
+
+
+**15.33 Relative [fs.op.relative]**
 
 ```cpp
 path relative(const path& p, const path& start = current_path());
@@ -594,7 +662,7 @@ path relative(const path& p, error_code& ec);
 path relative(const path& p, const path& start, error_code& ec);
 ```
 
-  * *Overview:* Return a relative path to `p` from the current directory or from an optional `start` path.
+  * *Effects:* Return a relative path to `p` from the current directory or from an optional `start` path.
 
   * *Returns:* A relative path, if the paths share a common 'root-name', otherwise `path()`. The relative path returned will satisfy the conditions shown in the following list. The `common` path is the common path that is shared between `p` and `start`. `rel_p` and `rel_start` are the divergent relative paths that remain after the `common` path is removed.
     * if `exists(start)`
@@ -608,9 +676,27 @@ path relative(const path& p, const path& start, error_code& ec);
 
   * *Remarks:* `exists(start) && !is_directory(start)` is an error.
 
+
+**15.36 Remove Common Prefix [fs.op.remove_common_prefix]**
+
+```cpp
+template <class ForwardIterator>
+  path remove_common_prefix( ForwardIterator first, ForwardIterator last )
+```
+  * *Effects:* Return and remove a common prefix from the sequence of paths defined by the range `[first,last)`. If there is no common prefix the paths in the range `[first,last)` will remain unchanged.
+
+  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+
+```cpp
+path remove_common_prefix( path& p1, path& p2 )
+```
+  * *Effects:* Return and remove a common prefix for the paths `p1` and `p2`. If there is no common prefix the paths `p1` and `p2` will remain unchanged.
+
+  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+
 ----
 
-and bump all following sections up by 0.2. Update the contents and any cross-references accordingly.
+and all intermediate and following section numbering accordingly. Also Update the contents and any cross-references as appropriate.
 
 ## 6. Reference Implementation
 
