@@ -435,8 +435,6 @@ relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
 //!           * else `normalize(start/relative(p,start)) == normalize(p)`
 //!
 //! \throw As specified in Error reporting.
-//!
-//! \note `exists(start) && !is_directory(start)` is an error.
 
 inline
 path_t
@@ -520,19 +518,7 @@ lexically_proximate( const path_t& p, const path_t& start )
 //!
 //! \param  `start` - the path that we want the proximate path from
 //!
-//! \return A relative path, if the paths share a common 'root-name',
-//!         otherwise `p`. The relative path returned will satisfy
-//!         the conditions shown in the following list. The common
-//!         path is the common path that is shared between `p` and `start`.
-//!         `rel_p` and `rel_start` are the divergent relative paths that
-//!         remain after the common path is removed.
-//!
-//!         * if `exists(start)`
-//!           * if `exists(p)` then `equivalent(start/relative(p,start),p) == true`
-//!           * else `normalize(canonical(start)/relative(p,start)) == canonical(common)/normalize(rel_p)`
-//!         * else
-//!           * if `exists(p)` then `normalize(canonical(common)/rel_start)/relative(p,start)) == canonical(p)`
-//!           * else `normalize(start/relative(p,start)) == normalize(p)`
+//! \return Returns as if by `relative( p, start ).empty() ? p : relative( p, start )`.
 //!
 //! \throw As specified in Error reporting.
 //!
@@ -546,6 +532,16 @@ proximate( const path_t& p, const path_t& start, boost::system::error_code& ec )
     return rel_path.empty() ? p : rel_path;
 }
 
+
+//! \brief Return a proximate path to `p` from the current
+//!        directory or from an optional `start` path.
+//!
+//! \param  `p` - the path we want a proximate path to
+//!
+//! \return Returns as if by `relative( p, start ).empty() ? p : relative( p, start )`.
+//!
+//! \throw As specified in Error reporting.
+
 inline
 path_t
 proximate( const path_t& p, boost::system::error_code& ec )
@@ -558,6 +554,19 @@ proximate( const path_t& p, boost::system::error_code& ec )
     return proximate( p, start, ec );
 }
 
+
+//! \brief Return a proximate path to `p` from the current
+//!        directory or from an optional `start` path.
+//!
+//! \param  `p` - the path we want a proximate path to
+//!
+//! \param  `start` - the path that we want the proximate path from
+//!
+//! \return Returns as if by `relative( p, start ).empty() ? p : relative( p, start )`.
+//!
+//! \throw As specified in Error reporting.
+//!
+//! \note `exists(start) && !is_directory(start)` is an error.
 
 inline
 path_t
