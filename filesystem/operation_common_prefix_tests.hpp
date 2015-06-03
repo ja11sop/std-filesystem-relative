@@ -51,7 +51,7 @@ void test_remove_common_prefix_from_several_paths()
         Paths.push_back( Common / Path );
     }
 
-    auto Prefix = boost::filesystem::common_prefix( Paths.begin(), Paths.end(), Paths.begin() );
+    auto Prefix = remove_common_prefix( Paths.begin(), Paths.end() );
 
     BOOST_CHECK( Prefix == Common );
 
@@ -89,11 +89,11 @@ void test_common_prefix_from_several_paths()
     std::vector<path_t> RelPaths = { "d/e/f/g/h", "d/j/k", "p/q/r" };
     std::vector<path_t> Paths;
 
-    for( const auto& Path: RelPaths )
+    for( const auto& RelPath: RelPaths )
     {
-        Paths.push_back( Common / Path );
+        Paths.push_back( Common / RelPath );
     }
-    auto Prefix = boost::filesystem::common_prefix( Paths.begin(), Paths.end() );
+    auto Prefix = common_prefix( Paths.begin(), Paths.end() );
 
     BOOST_CHECK( Prefix == Common );
 }

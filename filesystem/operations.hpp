@@ -20,8 +20,8 @@ namespace filesystem {
 // n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n
 
 
-using path_t = xstd::filesystem::path;
-//using path_t = boost::filesystem::path;
+//using path_t = xstd::filesystem::path;
+using path_t = boost::filesystem::path;
 
 
 // Helper function to make implementation easier - not part of the proposal
@@ -182,7 +182,8 @@ common_prefix( const path_t& p1, const path_t& p2 )
 //!
 //! \return a path representing the common prefix, if any, path() otherwise
 template<class InputIteratorT>
-auto common_prefix( InputIteratorT First, InputIteratorT Last )
+path_t
+common_prefix( InputIteratorT First, InputIteratorT Last )
 {
     return common_prefix_helper( First, Last ).first;
 }

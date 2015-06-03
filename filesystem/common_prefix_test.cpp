@@ -11,26 +11,23 @@ BOOST_AUTO_TEST_CASE( test_case_remove_prefix_from_two_paths )
     test_remove_prefix_from_two_paths();
 }
 
-
-BOOST_AUTO_TEST_CASE( test_case_common_prefix_from_initializer_list )
+BOOST_AUTO_TEST_CASE( test_case_remove_common_prefix_from_several_paths )
 {
-    test_common_prefix_from_initializer_list();
+    test_remove_common_prefix_from_several_paths();
 }
 
+BOOST_AUTO_TEST_CASE( test_case_common_prefix_from_two_paths )
+{
+    test_common_prefix_from_two_paths();
+}
 
 BOOST_AUTO_TEST_CASE( test_case_common_prefix_from_several_paths )
 {
     test_common_prefix_from_several_paths();
 }
 
-
-BOOST_AUTO_TEST_CASE( test_case_remove_common_prefix_from_several_paths )
+BOOST_AUTO_TEST_CASE( test_case_common_prefix_from_initializer_list )
 {
-    test_remove_common_prefix_from_several_paths();
+    test_common_prefix_from_initializer_list();
 }
 
-
-BOOST_AUTO_TEST_CASE( test_case_common_prefix_from_two_paths )
-{
-    test_common_prefix_from_two_paths();
-}
