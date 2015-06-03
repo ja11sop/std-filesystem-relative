@@ -21,6 +21,7 @@ namespace filesystem {
 
 
 using path_t = xstd::filesystem::path;
+//using path_t = boost::filesystem::path;
 
 
 // Helper function to make implementation easier - not part of the proposal
@@ -92,7 +93,6 @@ auto common_prefix_helper( InputIteratorT First, InputIteratorT Last )
 //! \param  last - a ForwardIterator to the end of the range
 //!
 //! \return a path representing the common prefix, if any, path() otherwise
-
 template <class ForwardIterator>
 path_t
 remove_common_prefix( ForwardIterator First, ForwardIterator Last )
@@ -110,7 +110,6 @@ remove_common_prefix( ForwardIterator First, ForwardIterator Last )
 //! \return a path representing the common prefix, if any, path() otherwise.
 //!         If a non-empty common prefix exists p1 and p2 will be changed to
 //!         relative paths with the common prefix removed.
-
 inline
 path_t
 remove_common_prefix( path_t& p1, path_t& p2 )
@@ -131,7 +130,6 @@ remove_common_prefix( path_t& p1, path_t& p2 )
 //! \param  out   - an OutputIterator to the start of the output range
 //!
 //! \return a path representing the common prefix, if any, path() otherwise
-
 template <class InputIterator, class OutputIterator>
 path_t
 common_prefix( InputIterator First, InputIterator Last, OutputIterator Out )
@@ -158,6 +156,7 @@ common_prefix( InputIterator First, InputIterator Last, OutputIterator Out )
     return Common;
 }
 
+
 //! \brief  Return a common prefix from the paths `p1` and `p2`
 //!
 //! \param  p1 - a path object
@@ -165,7 +164,6 @@ common_prefix( InputIterator First, InputIterator Last, OutputIterator Out )
 //! \param  p2 - a path object
 //!
 //! \return a path representing the common prefix, if any, path() otherwise
-
 inline
 path_t
 common_prefix( const path_t& p1, const path_t& p2 )
@@ -173,6 +171,7 @@ common_prefix( const path_t& p1, const path_t& p2 )
     std::array<std::reference_wrapper<const path_t>, 2> Paths = { p1, p2 };
     return common_prefix_helper( Paths.begin(), Paths.end() ).first;
 }
+
 
 //! \brief  Return a common prefix from the sequence of paths defined
 //!         by the range [first,last)
@@ -182,12 +181,12 @@ common_prefix( const path_t& p1, const path_t& p2 )
 //! \param  last  - an InputIterator to the end of the range
 //!
 //! \return a path representing the common prefix, if any, path() otherwise
-
 template<class InputIteratorT>
 auto common_prefix( InputIteratorT First, InputIteratorT Last )
 {
     return common_prefix_helper( First, Last ).first;
 }
+
 
 //! \brief  Return a common prefix from the sequence of paths referred to
 //!         by the initializer_list<path>
@@ -195,7 +194,6 @@ auto common_prefix( InputIteratorT First, InputIteratorT Last )
 //! \param  list - an initializer_list of paths
 //!
 //! \return a path representing the common prefix, if any, path() otherwise
-
 inline
 path_t
 common_prefix( std::initializer_list<path_t> List )
@@ -211,7 +209,6 @@ common_prefix( std::initializer_list<path_t> List )
 //! \param  p - the path that we want a normalized path of
 //!
 //! \return a path representing a normalized version of p
-
 inline
 path_t
 normalize( const path_t& p )
@@ -266,7 +263,6 @@ normalize( const path_t& p )
 //!         returned then it will satisfy:
 //!
 //!         `p == normalize( start / lexically_relative( p, start ) )`
-
 inline
 path_t
 lexically_relative( const path_t& p, const path_t& start )
@@ -336,7 +332,6 @@ lexically_relative( const path_t& p, const path_t& start )
 //! \throw As specified in Error reporting.
 //!
 //! \note `exists(start) && !is_directory(start)` is an error.
-
 inline
 path_t
 relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
@@ -435,7 +430,6 @@ relative( const path_t& p, const path_t& start, boost::system::error_code& ec )
 //!           * else `normalize(start/relative(p,start)) == normalize(p)`
 //!
 //! \throw As specified in Error reporting.
-
 inline
 path_t
 relative( const path_t& p, boost::system::error_code& ec )
@@ -473,7 +467,6 @@ relative( const path_t& p, boost::system::error_code& ec )
 //! \throw As specified in Error reporting.
 //!
 //! \note `exists(start) && !is_directory(start)` is an error.
-
 inline
 path_t
 relative( const path_t& p, const path_t& start = current_path() )
@@ -501,7 +494,6 @@ relative( const path_t& p, const path_t& start = current_path() )
 //!
 //! \return returns `lexically_relative( p, start )` if it exists,
 //!         otherwise `p`
-
 inline
 path_t
 lexically_proximate( const path_t& p, const path_t& start )
@@ -523,7 +515,6 @@ lexically_proximate( const path_t& p, const path_t& start )
 //! \throw As specified in Error reporting.
 //!
 //! \note `exists(start) && !is_directory(start)` is an error.
-
 inline
 path_t
 proximate( const path_t& p, const path_t& start, boost::system::error_code& ec )
@@ -541,7 +532,6 @@ proximate( const path_t& p, const path_t& start, boost::system::error_code& ec )
 //! \return Returns as if by `relative( p, start ).empty() ? p : relative( p, start )`.
 //!
 //! \throw As specified in Error reporting.
-
 inline
 path_t
 proximate( const path_t& p, boost::system::error_code& ec )
@@ -567,7 +557,6 @@ proximate( const path_t& p, boost::system::error_code& ec )
 //! \throw As specified in Error reporting.
 //!
 //! \note `exists(start) && !is_directory(start)` is an error.
-
 inline
 path_t
 proximate( const path_t& p, const path_t& start = current_path() )

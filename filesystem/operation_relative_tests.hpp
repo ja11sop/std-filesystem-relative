@@ -18,7 +18,7 @@
 // I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I
 
 
-using path_t = xstd::filesystem::path;
+using path_t = boost::filesystem::path_t;
 
 
 void test_relative( const path_t& Path, const path_t& Start )
@@ -28,7 +28,7 @@ void test_relative( const path_t& Path, const path_t& Start )
     BOOST_TEST_MESSAGE( "Start      = " << Start );
 
     auto Relative  = relative( Path, Start );
-    auto Proximate = Relative ? Relative : Path;
+    auto Proximate = !Relative.empty() ? Relative : Path;
 
     BOOST_TEST_MESSAGE( "Relative   = " << Relative );
     BOOST_TEST_MESSAGE( "Proximate  = " << Proximate );

@@ -30,3 +30,7 @@ BOOST_AUTO_TEST_CASE( test_case_remove_common_prefix_from_several_paths )
 }
 
 
+BOOST_AUTO_TEST_CASE( test_case_common_prefix_from_two_paths )
+{
+    test_common_prefix_from_two_paths();
+}

@@ -18,7 +18,7 @@
 // I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I I
 
 
-using path_t = xstd::filesystem::path;
+using path_t = boost::filesystem::path_t;
 
 
 void test_remove_prefix_from_two_paths()
@@ -60,9 +60,25 @@ void test_remove_common_prefix_from_several_paths()
 
     for( ; Path != Paths.end(); ++Path, ++RelPath )
     {
-        BOOST_TEST_MESSAGE( "Path = [" << *Path << "], RelPath = [" << *RelPath << "]" );
+        BOOST_TEST_MESSAGE( "Path = [" << *Path << "], Prefix = [" << Prefix << "], RelPath = [" << *RelPath << "]" );
         BOOST_CHECK( *Path == *RelPath );
     }
+}
+
+
+void test_common_prefix_from_two_paths()
+{
+    path_t Common = "/a/b/c/d";
+
+    path_t RelPath1 = "e/f/g/h";
+    path_t RelPath2 = "j/k";
+
+    path_t Path1 = Common / RelPath1;
+    path_t Path2 = Common / RelPath2;
+
+    auto Prefix = common_prefix( Path1, Path2 );
+
+    BOOST_CHECK( Prefix == Common );
 }
 
 
