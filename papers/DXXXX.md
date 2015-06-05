@@ -762,7 +762,7 @@ and all intermediate and following section numbering accordingly. Also Update th
 
 ## 6. Reference Implementation
 
-A prototype implementation based on [Boost.Filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/) along with tests can be found here, complete with a comprehensive set of tests.
+A prototype implementation based on [Boost.Filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/) along complete with a fairly comprehensive set of tests, can be found here:
 
 https://github.com/ja11sop/std-filesystem-relative
 
