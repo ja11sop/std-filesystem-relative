@@ -1,6 +1,6 @@
 # Additions to Filesystem supporting Relative Paths
 
-| Document Number: | DXXXX                      |
+| Document Number: | D0011                      |
 |:-----------------|:---------------------------|
 | Date:            | 2015-05-12                 |
 | Revises:         | None                       |
@@ -470,7 +470,7 @@ Setting aside the case of lexical-only versions for `relative()` and `proximate(
   7. `p1.is_relative()` may or may not be `true`
   8. `p2.is_relative()` may or may not be `true`
 
-In fact there are quite a few possibilities that make it hard correctly right a `relative()` (and hence `proximate()`) function. Except in the case where a lexical-only analysis is desired it is expected that the function should "just work". That is, should the paths exist on the filesystem and (say) contain symlinks then any resultant relative path that is identified must be capable of successfully navigating from the start path to the path provided. Given the combinations outlined in the previous list we can see that it is important to correctly specify and implement `relative()` so that it does indeed do the right thing. It is not sufficient to provide just a lexical-only operation and ask poeple to implement a functional `relative()` function on top of it. It is far too easy to get it wrong and getting it right is not a casually trivial implementation.
+In fact there are quite a few possibilities that make it hard correctly write a `relative()` (and hence `proximate()`) function. Except in the case where a lexical-only analysis is desired it is expected that the function should "just work". That is, should the paths exist on the filesystem and (say) contain symlinks then any resultant relative path that is identified must be capable of successfully navigating from the start path to the path provided. Given the combinations outlined in the previous list we can see that it is important to correctly specify and implement `relative()` so that it does indeed do the right thing. It is not sufficient to provide just a lexical-only operation and ask poeple to implement a functional `relative()` function on top of it. It is far too easy to get it wrong and getting it right is not a casually trivial implementation.
 
 As an example consider the following example implementation. It is certainly readable but not something you would want every user to have to write just to get correct behaviour:
 
