@@ -449,7 +449,7 @@ There is often a desire to restrict the behaviour of `relative()` and `proximate
 
   1.  Provide lexical-only member functions to `path`, say, `make_relative()` and `make_proximate()`, or `relative_from()` and `proximate_from()`. If such member functions were provided it may make sense to include a `make_normal()` or `normalize()` member also. 
   2.  Provide alternatively named free-functions that are lexical-only (**bikeshed warning**). Possible names (considering `relative` only for simplicity) might be `make_relative()`, `relative_path()`, `lexically_relative()` and so on.
-  3.  The last option is to specify a tag of some description that is passed to `relative()` and `proximate()` that controls whether the operation is lexcial-only. At this time it appears that the motivating use-case for this is simply lexical, or not. Other specific use cases (such as normalising paths first but not resolving symlinks) are best left to the user to build on top of a lexical-only function. If that is the case this could essentially be a `bool` flag.
+  3.  The last option is to specify a tag of some description that is passed to `relative()` and `proximate()` that controls whether the operation is lexical-only. At this time it appears that the motivating use-case for this is simply lexical, or not. Other specific use cases (such as normalising paths first but not resolving symlinks) are best left to the user to build on top of a lexical-only function. If that is the case this could essentially be a `bool` flag.
 
 Having separate lexical-only functions may allow a more optimal specification and a more optimal implementation when compared to a flag based approach. This proposal has favoured the second option. This feels more in keeping with other aspects of the library where the restrictive case is given the more precise name.
 
@@ -470,7 +470,7 @@ Setting aside the case of lexical-only versions for `relative()` and `proximate(
   7. `p1.is_relative()` may or may not be `true`
   8. `p2.is_relative()` may or may not be `true`
 
-In fact there are quite a few possibilities that make it hard correctly write a `relative()` (and hence `proximate()`) function. Except in the case where a lexical-only analysis is desired it is expected that the function should "just work". That is, should the paths exist on the filesystem and (say) contain symlinks then any resultant relative path that is identified must be capable of successfully navigating from the start path to the path provided. Given the combinations outlined in the previous list we can see that it is important to correctly specify and implement `relative()` so that it does indeed do the right thing. It is not sufficient to provide just a lexical-only operation and ask poeple to implement a functional `relative()` function on top of it. It is far too easy to get it wrong and getting it right is not a casually trivial implementation.
+In fact there are quite a few possibilities that make it hard to correctly write a `relative()` (and hence `proximate()`) function. Except in the case where a lexical-only analysis is desired it is expected that the function should "just work". That is, should the paths exist on the filesystem and (say) contain symlinks then any resultant relative path that is identified must be capable of successfully navigating from the start path to the path provided. Given the combinations outlined in the previous list we can see that it is important to correctly specify and implement `relative()` so that it does indeed do the right thing. It is not sufficient to provide just a lexical-only operation and ask people to implement a functional `relative()` function on top of it. It is far too easy to get it wrong and getting it right is not a casually trivial implementation.
 
 As an example consider the following example implementation. It is certainly readable but not something you would want every user to have to write just to get correct behaviour:
 
@@ -536,7 +536,7 @@ relative( const path& p, const path& start, std::error_code& ec )
 
 ### 3.3 `normalize`
 
-The specification of a `normalize()` free function, member or both is relatively straightforward in comparison to `relative()`. It will be a purely lexical operation. If the `path` to be normalised exists on the filesystem (and therefore my include symlinks) then `canonical()` is the best approach to normalisation.
+The specification of a `normalize()` free function, member or both is relatively straightforward in comparison to `relative()`. It will be a purely lexical operation. If the `path` to be normalised exists on the filesystem (and therefore may include symlinks) then `canonical()` is the best approach to normalisation.
 
 `normalize()` and `canonical()` both have value in specifying the effects of `relative()` which could vary depending on the existance or not of a `path`.
 
@@ -548,7 +548,7 @@ Identifying (and in many cases removing) a common path prefix shared between mut
 
 It makes sense for a `common_prefix()` to provide overloads for both `std::initializer_list<path>` and one taking a pair of `InputIterator`s. This could be extended further to take an additional `OutputIterator` parameter so that paths relative to the common path could be output. It also seems to make sense to provide for the most common use-case, a pair of paths, and so provide an overload taking two paths by `const` reference.
 
-The `remove_common_prefix()` variant is a little more restricted due to the need to remove any common prefix from the paths that are passed. This rules out having a `std::initializer_list<path>` overload. The iterator overload would be similar `common_prefix()` except that it would take two `ForwardIterator` parameters. This could be implemented in terms of the three iterator overload of `common_prefix()` passing `first` to `out`. Again providing an overload for the two path common case makes a lot of sense given the additional effort required to utilise the iterator interface.
+The `remove_common_prefix()` variant is a little more restricted due to the need to remove any common prefix from the paths that are passed. This rules out having a `std::initializer_list<path>` overload. The iterator overload would be similar to `common_prefix()` except that it would take two `ForwardIterator` parameters. This could be implemented in terms of the three iterator overload of `common_prefix()` passing `first` to `out`. Again providing an overload for the two path common case makes a lot of sense given the additional effort required to utilise the iterator interface.
 
 ## 4. Proposal
 
@@ -758,11 +758,11 @@ path remove_common_prefix( path& p1, path& p2 )
 
 ----
 
-and all intermediate and following section numbering accordingly. Also Update the contents and any cross-references as appropriate.
+and all intermediate and following section numbering accordingly. Also update the contents and any cross-references as appropriate.
 
 ## 6. Reference Implementation
 
-A prototype implementation based on [Boost.Filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/) along complete with a fairly comprehensive set of tests, can be found here:
+A prototype implementation based on [Boost.Filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/) along with a fairly comprehensive set of tests, can be found here:
 
 https://github.com/ja11sop/std-filesystem-relative
 
