@@ -768,4 +768,4 @@ https://github.com/ja11sop/std-filesystem-relative
 
 ## Acknowledgements
 
-The author would like to thank Christopher Kohlhoff for his suggestions and feedback.
+The author would like to thank Christopher Kohlhoff for his suggestions and feedback and also Jonathan Wakely for his editorial improvements.
