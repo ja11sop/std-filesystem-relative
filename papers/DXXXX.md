@@ -590,7 +590,7 @@ Insert the section:
 
 **4.18 proximate path [fs.def.proximate-path]**
 
-A path that may be absolute or relative but which captures the shortest traversal from one path to another. If the start path shares the same root then proximate path will be relative, otherwise absolute beginning with the root of the path you want to traverse to.
+A path that may be absolute or relative but which captures the shortest traversal from one path to another. If the start path shares the same root then proximate path will be relative, otherwise absolute beginning with the root of the path to be traversed to.
 
 ----
 
