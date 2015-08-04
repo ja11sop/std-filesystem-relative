@@ -642,7 +642,7 @@ template <class InputIterator>
 ```
   * *Effects:* Return a common prefix from the sequence of paths defined by the range `[first,last)`
 
-  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+  * *Returns:* a path representing the common prefix if any, otherwise `path()`.
 
 ```cpp
 template <class InputIterator, class OutputIterator>
@@ -650,21 +650,21 @@ template <class InputIterator, class OutputIterator>
 ```
   * *Effects:* Return a common prefix from the sequence of paths defined by the range `[first,last)`. The remaining relative path for each path in the range is placed in `out`. The path placed in `out` for an input path `first` with a common prefix `common` shall satisy the expression `*first == normalize( common/*out )`. 
 
-  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+  * *Returns:* a path representing the common prefix if any, otherwise `path()`.
 
 ```cpp
 path common_prefix( std::initializer_list<path> )
 ```
   * *Effects:* Return a common prefix from the sequence of paths referred to by the `initializer_list<path>` object. 
 
-  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+  * *Returns:* a path representing the common prefix if any, otherwise `path()`.
 
 ```cpp
 path common_prefix( const path& p1, const path& p2 )
 ```
   * *Effects:* Return a common prefix for the paths `p1` and `p2`.
 
-  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+  * *Returns:* a path representing the common prefix if any, otherwise `path()`.
 
 
 **15.27 Lexically Proximate [fs.op.lexically_proximate]**
@@ -747,14 +747,14 @@ template <class ForwardIterator>
 ```
   * *Effects:* Return and remove a common prefix from the sequence of paths defined by the range `[first,last)`. If there is no common prefix the paths in the range `[first,last)` will remain unchanged.
 
-  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+  * *Returns:* a path representing the common prefix if any, otherwise `path()`.
 
 ```cpp
 path remove_common_prefix( path& p1, path& p2 )
 ```
   * *Effects:* Return and remove a common prefix for the paths `p1` and `p2`. If there is no common prefix the paths `p1` and `p2` will remain unchanged.
 
-  * *Returns:* a path representing the common prefix if any, `path()` otherwise.
+  * *Returns:* a path representing the common prefix if any, otherwise `path()`.
 
 ----
 
