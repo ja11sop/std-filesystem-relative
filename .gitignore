@@ -32,5 +32,5 @@
 config.log
 
 # Build and Thirdparty folders
-.cuppa/
-.build/
+_cuppa/
+_build/

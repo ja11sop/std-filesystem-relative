@@ -2,7 +2,7 @@
 
 ## Draft Paper
 
-To read up on the background to this work please see the current latest [Draft Paper](papers/DXXXX.md) for more details.
+To read up on the background to this work please see the current latest [Draft Paper](papers/D0011.md) for more details.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ The tests build using [Scons](http://www.scons.org/) with **[cuppa](https://gith
 
 ```
 pip install cuppa
-``` 
+```
 
 ## Building
 
