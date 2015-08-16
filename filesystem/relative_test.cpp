@@ -56,3 +56,8 @@ BOOST_AUTO_TEST_CASE( test_case_paper_paths )
     test_paper_paths();
 }
 
+BOOST_AUTO_TEST_CASE( test_check_semantics )
+{
+    check_semantics();
+}
+

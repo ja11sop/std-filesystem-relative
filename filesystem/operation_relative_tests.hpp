@@ -24,19 +24,21 @@ using path_t = boost::filesystem::path_t;
 void test_relative( const path_t& Path, const path_t& Start )
 {
     BOOST_TEST_MESSAGE( "--------------------------------------------------------" );
-    BOOST_TEST_MESSAGE( "Path       = " << Path );
-    BOOST_TEST_MESSAGE( "Start      = " << Start );
+    BOOST_TEST_MESSAGE( "Path          = " << Path );
+    BOOST_TEST_MESSAGE( "Start         = " << Start );
 
     auto Relative  = relative( Path, Start );
     auto Proximate = !Relative.empty() ? Relative : Path;
 
-    BOOST_TEST_MESSAGE( "Relative   = " << Relative );
-    BOOST_TEST_MESSAGE( "Proximate  = " << Proximate );
+    BOOST_TEST_MESSAGE( "Relative      = " << Relative );
+    BOOST_TEST_MESSAGE( "Proximate     = " << Proximate );
+    BOOST_TEST_MESSAGE( "Lexically Rel = " << lexically_relative( Path, Start ) );
+
 
     if( exists( Path ) && exists( Start ) )
     {
-        BOOST_TEST_MESSAGE( "Real Path  = " << canonical( Path ) );
-        BOOST_TEST_MESSAGE( "Real Start = " << canonical( Start ) );
+        BOOST_TEST_MESSAGE( "Real Path     = " << canonical( Path ) );
+        BOOST_TEST_MESSAGE( "Real Start    = " << canonical( Start ) );
 
         BOOST_CHECK( Relative.empty() != equivalent( Start/Relative, Path ) );
     }
@@ -50,13 +52,13 @@ void test_relative( const path_t& Path, const path_t& Start )
         RealPath   = exists( Path )       ? canonical( Path )       : CommonPath/normalize( RealPath );
         RealStart  = exists( Start )      ? canonical( Start )      : CommonPath/normalize( RealStart );
 
-        BOOST_TEST_MESSAGE( "CommonPath = " << CommonPath );
-        BOOST_TEST_MESSAGE( "Real Path  = " << RealPath );
-        BOOST_TEST_MESSAGE( "Real Start = " << RealStart );
+        BOOST_TEST_MESSAGE( "CommonPath    = " << CommonPath );
+        BOOST_TEST_MESSAGE( "Real Path     = " << RealPath );
+        BOOST_TEST_MESSAGE( "Real Start    = " << RealStart );
 
         auto Normalized = normalize( RealStart/Relative );
 
-        BOOST_TEST_MESSAGE( "Normalized = " << Normalized );
+        BOOST_TEST_MESSAGE( "Normalized    = " << Normalized );
 
         BOOST_CHECK( Relative.empty() != ( Normalized == RealPath ) );
     }
@@ -271,6 +273,15 @@ void multiple_nested_symlinks()
 
     test_relative( dir_e, testdir );
     test_relative( testdir, dir_e );
+
+    test_relative( dir_d, dir_x );
+    test_relative( dir_x, dir_d );
+
+    test_relative( dir_d, dir_y );
+    test_relative( dir_y, dir_d );
+
+    test_relative( dir_e, dir_y );
+    test_relative( dir_y, dir_e );
 
     remove_all( test_base );
 }
@@ -622,6 +633,35 @@ void test_paper_paths()
     test_relative( "/a/b/c",      "/a/d"   );
     test_relative( "//C_drive/y", "//C_drive/x" );
     test_relative( "//D_drive/y", "//C_drive/x" );
+}
+
+
+void check_semantics()
+{
+    auto Dot   = boost::filesystem::path(".");
+    auto Empty = boost::filesystem::path();
+
+    std::cout << "                dot = " << Dot   << std::endl;
+    std::cout << "              empty = " << Empty << std::endl;
+
+    std::cout << "    is_dir(  dot  ) : " << std::boolalpha << is_directory(Dot)    << std::endl;
+    std::cout << "    is_dir( empty ) : " << std::boolalpha << is_directory(Empty)  << std::endl;
+
+    std::cout << "    status(  dot  ) : " << status(Dot).type()   << std::endl;
+    std::cout << "    status( empty ) : " << status(Empty).type() << std::endl;
+
+    std::cout << "       status_error = " << boost::filesystem::status_error   << std::endl;
+    std::cout << "       type_unknown = " << boost::filesystem::type_unknown   << std::endl;
+    std::cout << "     directory_file = " << boost::filesystem::directory_file << std::endl;
+    std::cout << "     file_not_found = " << boost::filesystem::file_not_found << std::endl;
+
+    std::cout << "     current_path() : " << boost::filesystem::current_path() << std::endl;
+
+    current_path(Dot);
+    std::cout << "  current_path(dot) : " << boost::filesystem::current_path() << std::endl;
+
+    current_path(Empty); // THROWS std::runtime_error: boost::filesystem::current_path: No such file or directory
+    std::cout << "current_path(Empty) : " << boost::filesystem::current_path() << std::endl;
 }
 
 
