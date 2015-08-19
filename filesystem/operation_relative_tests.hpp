@@ -24,23 +24,30 @@ using path_t = boost::filesystem::path_t;
 void test_relative( const path_t& Path, const path_t& Start )
 {
     BOOST_TEST_MESSAGE( "--------------------------------------------------------" );
-    BOOST_TEST_MESSAGE( "Path          = " << Path );
-    BOOST_TEST_MESSAGE( "Start         = " << Start );
+    BOOST_TEST_MESSAGE( "From (start)    = " << Start );
+    BOOST_TEST_MESSAGE( "To   (path)     = " << Path );
 
     auto Relative  = relative( Path, Start );
     auto Proximate = !Relative.empty() ? Relative : Path;
 
-    BOOST_TEST_MESSAGE( "Relative      = " << Relative );
-    BOOST_TEST_MESSAGE( "Proximate     = " << Proximate );
-    BOOST_TEST_MESSAGE( "Lexically Rel = " << lexically_relative( Path, Start ) );
+    BOOST_TEST_MESSAGE( "Relative        = " << Relative );
+    BOOST_TEST_MESSAGE( "Proximate       = " << Proximate );
+
+    auto LexicallyRelative = lexically_relative( Path, Start );
+
+    BOOST_TEST_MESSAGE( "Lexically Rel   = " << LexicallyRelative );
 
 
     if( exists( Path ) && exists( Start ) )
     {
-        BOOST_TEST_MESSAGE( "Real Path     = " << canonical( Path ) );
-        BOOST_TEST_MESSAGE( "Real Start    = " << canonical( Start ) );
+        BOOST_TEST_MESSAGE( "Real Path       = " << canonical( Path ) );
+        BOOST_TEST_MESSAGE( "Real Start      = " << canonical( Start ) );
 
         BOOST_CHECK( Relative.empty() != equivalent( Start/Relative, Path ) );
+        BOOST_TEST_MESSAGE( "equivalent      = " << equivalent( Start/Relative, Path ) );
+        BOOST_TEST_MESSAGE( "equivalent(lex) = " << equivalent( Start/LexicallyRelative, Path ) );
+        auto Same = equivalent( Start/Relative, Path ) == equivalent( Start/LexicallyRelative, Path );
+        BOOST_TEST_MESSAGE( "rel==lex_rel?   = " << ( Same ? "Same" : "NOT Same!" ) );
     }
     else
     {
@@ -52,13 +59,13 @@ void test_relative( const path_t& Path, const path_t& Start )
         RealPath   = exists( Path )       ? canonical( Path )       : CommonPath/normalize( RealPath );
         RealStart  = exists( Start )      ? canonical( Start )      : CommonPath/normalize( RealStart );
 
-        BOOST_TEST_MESSAGE( "CommonPath    = " << CommonPath );
-        BOOST_TEST_MESSAGE( "Real Path     = " << RealPath );
-        BOOST_TEST_MESSAGE( "Real Start    = " << RealStart );
+        BOOST_TEST_MESSAGE( "CommonPath      = " << CommonPath );
+        BOOST_TEST_MESSAGE( "Real Path       = " << RealPath );
+        BOOST_TEST_MESSAGE( "Real Start      = " << RealStart );
 
         auto Normalized = normalize( RealStart/Relative );
 
-        BOOST_TEST_MESSAGE( "Normalized    = " << Normalized );
+        BOOST_TEST_MESSAGE( "Normalized      = " << Normalized );
 
         BOOST_CHECK( Relative.empty() != ( Normalized == RealPath ) );
     }
@@ -638,6 +645,7 @@ void test_paper_paths()
 
 void check_semantics()
 {
+    // TODO Write this as proper tests
     auto Dot   = boost::filesystem::path(".");
     auto Empty = boost::filesystem::path();
 

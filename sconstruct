@@ -3,7 +3,7 @@ import cuppa
 
 cuppa.run(
     default_options = {
-        'boost-version': "latest",
+        'boost-version': "1.58",
     },
     default_dependencies = [
         'boost'
