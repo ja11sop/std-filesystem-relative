@@ -2,7 +2,7 @@
 
 ## Draft Paper
 
-To read up on the background to this work please see the current latest [Draft Paper](papers/D0011.md) for more details.
+To read up on the background to this work please see the current latest [Paper](papers/P0011R0.md) for more details.
 
 ## Requirements
 
